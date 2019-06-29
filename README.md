@@ -1,11 +1,14 @@
-[Optional](https://github.com/nlkl/Optional) + [FluentResults](https://github.com/altmann/FluentResults) = ❤
+Ultimately: [Optional](https://github.com/nlkl/Optional) + [FluentResults](https://github.com/altmann/FluentResults) = ❤
 -
+
+![logo](https://github.com/silkfire/Ultimately/blob/master/img/logo.png)
+
 
 **Ultimately** provides a robust either type with rich error and success models for C#.
 
 ## What and Why?
 
-Optional is a strongly typed alternative to null values that lets you:
+An `Option` is a strongly typed alternative to null values that lets you:
 
 * Avoid those pesky null-reference exceptions
 * Signal intent and model your data more explictly
