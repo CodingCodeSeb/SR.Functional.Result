@@ -1,8 +1,7 @@
-![Optional](https://raw.githubusercontent.com/nlkl/Optional/master/icon/Logo.png)
+[Optional](https://github.com/nlkl/Optional) + [FluentResults](https://github.com/altmann/FluentResults) = ❤
+-
 
-Optional is a robust option/maybe type for C#.
-
-Version: 4.0.0
+**Ultimately** provides a robust either type with rich error and success models for C#.
 
 ## What and Why?
 
