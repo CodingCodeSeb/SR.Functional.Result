@@ -68,7 +68,6 @@
         /// Tries to parse a string into a signed byte.
         /// </summary>
         /// <returns>An optional value containing the result if any.</returns>
-        [CLSCompliant(false)]
         public static Option<sbyte> ToSByte(string s, Error error = null)
         {
             return To<sbyte>(s, sbyte.TryParse, error);
@@ -78,7 +77,6 @@
         /// Tries to parse a string into a signed byte.
         /// </summary>
         /// <returns>An optional value containing the result if any.</returns>
-        [CLSCompliant(false)]
         public static Option<sbyte> ToSByte(string s, NumberStyles style, IFormatProvider provider, Error error = null)
         {
             return To<sbyte>(s, style, provider, sbyte.TryParse, error);
@@ -106,7 +104,6 @@
         /// Tries to parse a string into an unsigned short.
         /// </summary>
         /// <returns>An optional value containing the result if any.</returns>
-        [CLSCompliant(false)]
         public static Option<ushort> ToUShort(string s, Error error = null)
         {
             return To<ushort>(s, ushort.TryParse, error);
@@ -116,7 +113,6 @@
         /// Tries to parse a string into an unsigned short.
         /// </summary>
         /// <returns>An optional value containing the result if any.</returns>
-        [CLSCompliant(false)]
         public static Option<ushort> ToUShort(string s, NumberStyles style, IFormatProvider provider, Error error = null)
         {
             return To<ushort>(s, style, provider, ushort.TryParse, error);
@@ -144,7 +140,6 @@
         /// Tries to parse a string into an unsigned int.
         /// </summary>
         /// <returns>An optional value containing the result if any.</returns>
-        [CLSCompliant(false)]
         public static Option<uint> ToUInt(string s, Error error = null)
         {
             return To<uint>(s, uint.TryParse, error);
@@ -154,7 +149,6 @@
         /// Tries to parse a string into an unsigned int.
         /// </summary>
         /// <returns>An optional value containing the result if any.</returns>
-        [CLSCompliant(false)]
         public static Option<uint> ToUInt(string s, NumberStyles style, IFormatProvider provider, Error error = null)
         {
             return To<uint>(s, style, provider, uint.TryParse, error);
@@ -182,7 +176,6 @@
         /// Tries to parse a string into an unsigned long.
         /// </summary>
         /// <returns>An optional value containing the result if any.</returns>
-        [CLSCompliant(false)]
         public static Option<ulong> ToULong(string s, Error error = null)
         {
             return To<ulong>(s, ulong.TryParse, error);
@@ -192,7 +185,6 @@
         /// Tries to parse a string into an unsigned long.
         /// </summary>
         /// <returns>An optional value containing the result if any.</returns>
-        [CLSCompliant(false)]
         public static Option<ulong> ToULong(string s, NumberStyles style, IFormatProvider provider, Error error = null)
         {
             return To<ulong>(s, style, provider, ulong.TryParse, error);
