@@ -13,7 +13,7 @@
     <PackageIconUrl>https://raw.githubusercontent.com/silkfire/Ultimately/d71546db888ac33aa425e9a8adef64410c306c05/img/logo.png</PackageIconUrl>
     <NoWarn>1591</NoWarn>
 	<GenerateDocumentationFile>true</GenerateDocumentationFile>
-	<PackageReleaseNotes>Added additional mapping methods</PackageReleaseNotes>
+	<PackageReleaseNotes>1.1.0 Added additional mapping methods</PackageReleaseNotes>
 	<FileVersion>1.1.0.0</FileVersion>
   </PropertyGroup>
 
