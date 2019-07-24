@@ -14,7 +14,7 @@
         /// Creates an optional with a successful outcome.
         /// </summary>
         /// <returns>An optional with a successful outcome.</returns>
-        public static Option Some() => Some(Success.Create(""));
+        public static Option Some() => Some(default);
 
         /// <summary>
         /// Creates an optional with a successful outcome.
@@ -177,14 +177,14 @@
         /// </summary>
         /// <param name="none">An empty optional whose error object to copy.</param>
         /// <returns>An empty optional based on the specified empty optional.</returns>
-        public static Option<TValueDestination> None<TValueSource, TValueDestination>(Option<TValueSource> none)
+        public static Option<TResult> None<TValue, TResult>(Option<TValue> none)
         {
             if (none.HasValue)
             {
                 throw new ArgumentException("Source optional must be empty");
             }
 
-            return new Option<TValueDestination>(false, default, null, none.Error);
+            return new Option<TResult>(false, default, null, none.Error);
         }
 
         /// <summary>

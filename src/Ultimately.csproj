@@ -8,11 +8,13 @@
 	<PackageLicenseUrl>https://github.com/silkfire/Ultimately/blob/master/LICENSE</PackageLicenseUrl>
 	<PackageProjectUrl>https://github.com/silkfire/Ultimately</PackageProjectUrl>
     <PackageTags>option optional some none monadic maybe either null monad monadic result results resultful fluentresults functional pipeline pipelines</PackageTags>
-    <Version>1.0.0</Version>
-	<AssemblyVersion>1.0.0.0</AssemblyVersion>
+    <Version>1.1.0</Version>
+	<AssemblyVersion>1.1.0.0</AssemblyVersion>
     <PackageIconUrl>https://raw.githubusercontent.com/silkfire/Ultimately/d71546db888ac33aa425e9a8adef64410c306c05/img/logo.png</PackageIconUrl>
     <NoWarn>1591</NoWarn>
 	<GenerateDocumentationFile>true</GenerateDocumentationFile>
+	<PackageReleaseNotes>Added additional mapping methods</PackageReleaseNotes>
+	<FileVersion>1.1.0.0</FileVersion>
   </PropertyGroup>
 
 </Project>
