@@ -3,7 +3,6 @@
     using Reasons;
 
     using System;
-    using System.Collections.Generic;
 
 
     /// <summary>
@@ -45,6 +44,21 @@
         /// <param name="error">An error object with data describing what caused the unsuccessful outcome.</param>
         /// <returns>An optional with an unsuccessful outcome.</returns>
         public static Option None(Error error) => new Option(false, null, error);
+
+        /// <summary>
+        /// Creates an optional with an unsuccessful outcome with the error object of an empty optional.
+        /// </summary>
+        /// <param name="none">An empty optional whose error object to copy.</param>
+        /// <returns>An optional with an unsuccessful outcome based on the specified empty optional.</returns>
+        public static Option None<TValue>(Option<TValue> none)
+        {
+            if (none.HasValue)
+            {
+                throw new ArgumentException("Source optional must be empty");
+            }
+
+            return new Option(false, null, none.Error);
+        }
 
         /// <summary>
         /// Creates an <see cref="Option"/> instance whose outcome depends on the satisfaction of the given predicate.
@@ -143,6 +157,35 @@
         /// <returns>An empty optional.</returns>
         public static Option<TValue> None<TValue>(Error error) => new Option<TValue>(false, default, null, error);
 
+        /// <summary>
+        /// Creates an empty optional with the error object of an optional with an unsuccessful outcome.
+        /// </summary>
+        /// <param name="none">An empty optional whose error object to copy.</param>
+        /// <returns>An empty optional based on the specified optional with an unsuccessful outcome.</returns>
+        public static Option<TValue> None<TValue>(Option none)
+        {
+            if (none.IsSuccessful)
+            {
+                throw new ArgumentException("Source optional must be unsuccessful");
+            }
+
+            return new Option<TValue>(false, default, null, none.Error);
+        }
+
+        /// <summary>
+        /// Creates a new empty optional with the error object of the specified empty optional.
+        /// </summary>
+        /// <param name="none">An empty optional whose error object to copy.</param>
+        /// <returns>An empty optional based on the specified empty optional.</returns>
+        public static Option<TValueDestination> None<TValueSource, TValueDestination>(Option<TValueSource> none)
+        {
+            if (none.HasValue)
+            {
+                throw new ArgumentException("Source optional must be empty");
+            }
+
+            return new Option<TValueDestination>(false, default, null, none.Error);
+        }
 
         /// <summary>
         /// Creates an optional that wraps a delegate that when resolved, may return a successful or an unsuccessful outcome.
