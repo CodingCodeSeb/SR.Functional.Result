@@ -1,6 +1,4 @@
-﻿// Note: Several of the below implementations are closely inspired by the corefx source code for FirstOrDefault, etc.
-
-namespace Ultimately.Collections
+﻿namespace Ultimately.Collections
 {
     using Reasons;
     using Utilities;
@@ -400,7 +398,7 @@ namespace Ultimately.Collections
         }
 
         /// <summary>
-        /// Aggregates a sequence of deferred options into one result, short-circuiting as soon as an empty optional is hit.
+        /// Aggregates a sequence of deferred options into one result, sequentially processing each option and short-circuiting as soon as a result resolves into an unsuccessful outcome.
         /// </summary>
         /// <param name="lazyOptionsCollection">Sequence of <see cref="LazyOption"/>s to reduce.</param>
         public static Option Reduce(this IEnumerable<LazyOption> lazyOptionsCollection)
@@ -416,20 +414,20 @@ namespace Ultimately.Collections
         /// <typeparam name="TResult">The type of the resulting optional value.</typeparam>
         /// <param name="source">Sequence of items to transform.</param>
         /// <param name="func">Transformation function to apply to each item of the sequence.</param>
-        public static Option<IEnumerable<TResult>> Transform<TSource, TResult>(this IEnumerable<TSource> source, Func<TSource, Option<TResult>> func)
+        public static Option<IReadOnlyList<TResult>> Transform<TSource, TResult>(this IEnumerable<TSource> source, Func<TSource, Option<TResult>> func)
         {
             Option<TResult>? failedTransformation = null;
 
 
-            var transformationResult = Transform();
+            var transformationResult = Transform().ToList();
 
             if (failedTransformation.HasValue)
             {
-                return Optional.None<IEnumerable<TResult>>(failedTransformation.Value.Error);
+                return Optional.None<IReadOnlyList<TResult>>(failedTransformation.Value.Error);
             }
 
 
-            return Optional.Some(transformationResult);
+            return Optional.Some(transformationResult.AsReadOnly() as IReadOnlyList<TResult>);
 
 
 

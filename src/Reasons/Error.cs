@@ -119,6 +119,13 @@
             return Create(message);
         }
 
+        /// <summary>
+        /// Formats the error object as a one-line string.
+        /// </summary>
+        public string Print(string separator = " → ")
+        {
+            return string.Join(separator, new List<string> { Message }.Concat(Reasons.Select(r => r.Message)));
+        }
 
 
         protected override ReasonStringBuilder GetReasonStringBuilder()

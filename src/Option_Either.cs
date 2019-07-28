@@ -311,30 +311,64 @@
         /// Transforms the inner value of an optional into another optional. The result is flattened, and if either is empty, an empty optional is returned.
         /// </summary>
         /// <param name="mapping">The transformation function.</param>
+        /// <param name="error">An error object to prepend to the resulting optional in case it is empty.<para>Specify null to simply copy the original error object with no additional reason message.</para></param>
         /// <returns>The transformed optional.</returns>
-        public Option<TResult> FlatMap<TResult>(Func<TValue, Option<TResult>> mapping)
+        public Option<TResult> FlatMap<TResult>(Func<TValue, Option<TResult>> mapping, Error error = null)
         {
             if (mapping == null) throw new ArgumentNullException(nameof(mapping));
 
-            return Match(
-                some: mapping,
-                none: Optional.None<TResult>
-            );
+            Option<TResult> result;
+
+            if (HasValue)
+            {
+                result = mapping(Value);
+
+                result.MatchNone(e =>
+                {
+                    if (error != null)
+                    {
+                        result = Optional.None<TResult>(error.CausedBy(e));
+                    }
+                });
+            }
+            else
+            {
+                result = Optional.None<TResult>(Error);
+            }
+
+            return result;
         }
 
         /// <summary>
         /// Transforms the inner value of an optional into another optional. The result is flattened, and if either is empty, an empty optional is returned.
         /// </summary>
         /// <param name="mapping">The transformation function.</param>
+        /// <param name="error">An error object to prepend to the resulting optional in case it is empty.<para>Specify null to simply copy the original error object with no additional reason message.</para></param>
         /// <returns>The transformed optional.</returns>
-        public Option<TResult> FlatMap<TResult>(Func<TValue, Success, Option<TResult>> mapping)
+        public Option<TResult> FlatMap<TResult>(Func<TValue, Success, Option<TResult>> mapping, Error error = null)
         {
             if (mapping == null) throw new ArgumentNullException(nameof(mapping));
 
-            return Match(
-                some: mapping,
-                none: Optional.None<TResult>
-            );
+            Option<TResult> result;
+
+            if (HasValue)
+            {
+                result = mapping(Value, Success);
+
+                result.MatchNone(e =>
+                {
+                    if (error != null)
+                    {
+                        result = Optional.None<TResult>(error.CausedBy(e));
+                    }
+                });
+            }
+            else
+            {
+                result = Optional.None<TResult>(Error);
+            }
+
+            return result;
         }
 
         /// <summary>
@@ -342,7 +376,7 @@
         /// </summary>
         /// <param name="predicate">The predicate.</param>
         /// <param name="predicateFailure">An error object with data describing why the predicate failed.</param>
-        /// <param name="error">An error object stating that the predicate failed to execute in case the optional is empty.<para>Specify null to just copy the original error object with no additional reason message.</para></param>
+        /// <param name="error">An error object stating that the predicate failed to execute in case the optional is empty.<para>Specify null to simply copy the original error object with no additional reason message.</para></param>
         /// <returns>The filtered optional.</returns>
         public Option<TValue> Filter(Predicate<TValue> predicate, Error predicateFailure, Error error = null)
         {
@@ -354,7 +388,7 @@
         /// </summary>
         /// <param name="predicate">The predicate.</param>
         /// <param name="predicateFailure">A function that returns an error object with data describing why the predicate failed.</param>
-        /// <param name="error">An error object stating that the predicate failed to execute in case the optional is empty.<para>Specify null to just copy the original error object with no additional reason message.</para></param>
+        /// <param name="error">An error object stating that the predicate failed to execute in case the optional is empty.<para>Specify null to simply copy the original error object with no additional reason message.</para></param>
         /// <returns>The filtered optional.</returns>
         public Option<TValue> Filter(Predicate<TValue> predicate, Func<TValue, Error> predicateFailure, Error error = null)
         {
