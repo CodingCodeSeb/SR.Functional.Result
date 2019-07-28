@@ -8,6 +8,9 @@
 
     public class Error : Reason
     {
+        public static Error Default = new Error("");
+
+
         public List<Error> Reasons { get; }
 
         private Error()

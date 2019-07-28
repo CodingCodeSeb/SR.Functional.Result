@@ -14,7 +14,7 @@
         /// Creates an optional with a successful outcome.
         /// </summary>
         /// <returns>An optional with a successful outcome.</returns>
-        public static Option Some() => Some(default);
+        public static Option Some() => Some(Success.Default);
 
         /// <summary>
         /// Creates an optional with a successful outcome.
@@ -200,7 +200,7 @@
         /// </summary>
         public static LazyOption Lazy(Func<bool> outcomeDelegate, Error error)
         {
-            return Lazy(outcomeDelegate, default, error);
+            return Lazy(outcomeDelegate, Success.Default, error);
         }
     }
 }

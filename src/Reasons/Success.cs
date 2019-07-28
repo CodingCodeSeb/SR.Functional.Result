@@ -6,6 +6,9 @@
 
     public class Success : Reason
     {
+        public static Success Default = new Success("");
+
+
         private Success(string message)
         {
             Message = message;

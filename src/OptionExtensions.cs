@@ -181,7 +181,7 @@
             if (mapping == null) throw new ArgumentNullException(nameof(mapping));
 
             return option.Match(
-                some: () => Optional.Some(mapping()),
+                some: s => Optional.Some(mapping(), s),
                 none: Optional.None<TResult>
             );
         }
@@ -193,6 +193,22 @@
         /// <param name="mapping">The transformation function.</param>
         /// <returns>The transformed optional.</returns>
         public static Option<TResult> FlatMap<TResult>(this Option option, Func<Option<TResult>> mapping)
+        {
+            if (mapping == null) throw new ArgumentNullException(nameof(mapping));
+
+            return option.Match(
+                some: mapping,
+                none: Optional.None<TResult>
+            );
+        }
+
+        /// <summary>
+        /// Transforms the optional into an optional with a value. The result is flattened, and if either optional's outcome is unsuccessful, an empty optional is returned.
+        /// </summary>
+        /// <param name="option">The optional to transform.</param>
+        /// <param name="mapping">The transformation function.</param>
+        /// <returns>The transformed optional.</returns>
+        public static Option<TResult> FlatMap<TResult>(this Option option, Func<Success, Option<TResult>> mapping)
         {
             if (mapping == null) throw new ArgumentNullException(nameof(mapping));
 
