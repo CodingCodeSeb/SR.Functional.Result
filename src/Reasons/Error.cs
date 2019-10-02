@@ -23,12 +23,10 @@
             Message = message;
         }
 
-        protected Error(string message, Error causedBy) : this(message)
+        private Error(string message, Error causedBy) : this(message)
         {
             Reasons.Add(causedBy);
         }
-
-
 
 
         public static Error Create(string message)
@@ -40,8 +38,6 @@
         {
             return new Error(message, causedBy);
         }
-
-
 
 
         public Error CausedBy(string message)
@@ -70,6 +66,18 @@
             return this;
         }
 
+        public Error CausedBy(Option none)
+        {
+            if (none.IsSuccessful)
+            {
+                throw new InvalidOperationException("The optional's outcome must be unsuccessful in order to access its error object");
+            }
+
+            none.MatchNone(e => Reasons.Add(e));
+
+            return this;
+        }
+
         public Error CausedBy(Exception exception)
         {
             Reasons.Add(ExceptionalError.Create(exception));
@@ -77,24 +85,9 @@
             return this;
         }
 
-        public Error CausedBy(string message, Exception exception)
-        {
-            Reasons.Add(ExceptionalError.Create(message, exception));
-
-            return this;
-        }
-
-
         public Error WithMetadata(string metadataName, object metadataValue)
         {
             Metadata.Add(metadataName, metadataValue);
-
-            return this;
-        }
-
-        public Error WithMetadata(KeyValuePair<string, object> metadataEntry)
-        {
-            Metadata.Add(metadataEntry.Key, metadataEntry.Value);
 
             return this;
         }
@@ -125,9 +118,38 @@
         /// <summary>
         /// Formats the error object as a one-line string.
         /// </summary>
-        public string Print(string separator = " → ")
+        /// <param name="separator">A string to delimit the indivudual error messages with.</param>
+        /// <param name="depth">The amount of levels to traverse in the error chain. Zero means infinite depth.</param>
+        /// <param name="transformFunc">A function to transform each message according to.</param>
+        public string Print(string separator = " → ", byte depth = 0, Func<string, string> transformFunc = null)
         {
-            return string.Join(separator, new List<string> { Message }.Concat(Reasons.Select(r => r.Message)));
+            if (transformFunc == null)
+            {
+                transformFunc = s => s;
+            }
+
+            var errorMessageChain = GetErrorMessageChain(new List<string>(), this, depth).Select(transformFunc);
+
+            return string.Join(separator, errorMessageChain);
+        }
+
+        private static List<string> GetErrorMessageChain(List<string> messages, Error error, byte depth = 0)
+        {
+            var currentDepth = 0;
+
+            while (true)
+            {
+                if (error == null || depth > 0 && currentDepth == depth)
+                {
+                    return messages;
+                }
+
+                messages.Add(error.Message);
+
+                error = error.Reasons.FirstOrDefault();
+
+                currentDepth++;
+            }
         }
 
 

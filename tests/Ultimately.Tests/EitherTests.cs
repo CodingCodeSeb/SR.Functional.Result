@@ -84,7 +84,7 @@
         {
             Assert.Equal("None(Error='No value')", Optional.None<int>("No value").ToString());
             Assert.Equal("None(Error='No value')", Optional.None<int>(Error.Create("No value")).ToString());
-            Assert.Equal("None(Error='No value', Exception='System.Exception: An exception occurred')", Optional.None<int>("No value", new Exception("An exception occurred")).ToString());
+            Assert.Equal("None(Error='No value', Caused by=Exception: 'An exception occurred')", Optional.None<int>("No value", new Exception("An exception occurred")).ToString());
 
             Assert.Equal("Some()", Optional.Some<int?>(null).ToString());
             Assert.Equal("Some()", Optional.Some<string>(null).ToString());

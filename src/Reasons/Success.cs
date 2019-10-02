@@ -1,5 +1,6 @@
 ﻿namespace Ultimately.Reasons
 {
+    using System;
     using System.Collections.Generic;
     using System.Linq;
 
@@ -8,16 +9,62 @@
     {
         public static Success Default = new Success("");
 
+        public List<Success> Reasons { get; }
 
-        private Success(string message)
+
+        private Success()
+        {
+            Reasons = new List<Success>();
+        }
+
+        private Success(string message) : this()
         {
             Message = message;
         }
+
+        private Success(string message, Success antecededBy) : this(message)
+        {
+            Reasons.Add(antecededBy);
+        }
+
 
         public static Success Create(string message)
         {
             return new Success(message);
         }
+
+        public static Success Create(string message, Success antecededBy)
+        {
+            return new Success(message, antecededBy);
+        }
+
+
+        public Success AntecededBy(string message)
+        {
+            Reasons.Add(new Success(message));
+
+            return this;
+        }
+
+        public Success AntecededBy(Success success)
+        {
+            Reasons.Add(success);
+
+            return this;
+        }
+
+        public Success AntecededBy<TValue>(Option<TValue> some)
+        {
+            if (some.HasValue)
+            {
+                throw new InvalidOperationException("The optional value cannot empty in order to access its success object");
+            }
+
+            some.MatchSome((_, s) => Reasons.Add(s));
+
+            return this;
+        }
+
 
         public Success WithMetadata(string metadataName, object metadataValue)
         {
@@ -42,7 +89,8 @@
         {
             return new ReasonStringBuilder()
                 .WithInfo("", Message)
-                .WithInfoNoQuotes(nameof(Metadata), string.Join("; ", Metadata.Select(kvp => $"'{kvp.Key}: {kvp.Value}'")));
+                .WithInfoNoQuotes(nameof(Metadata), string.Join("; ", Metadata.Select(kvp => $"'{kvp.Key}: {kvp.Value}'")))
+                .WithInfoNoQuotes("Anteceded by", $"{string.Join(" ⁎ ", Reasons)}");
         }
     }
 }

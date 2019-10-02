@@ -9,6 +9,7 @@
     using System.Collections;
     using System.Collections.Generic;
     using System.Linq;
+    using System.Threading.Tasks;
 
 
     public class CollectionTests
@@ -186,55 +187,8 @@
             GetValueOperator(dictionaryB.ToList(), excludedKeysB);
         }
 
-
         [Fact]
         public void Collections_Reduce()
-        {
-            const int value = 42;
-
-            var validationRules1 = new List<Option<int>>
-            {
-                value.SomeWhen(v => v % 2 == 0, "Value must be even"),
-                value.SomeWhen(v => v / 2 == 21, "Value divided by two must equal 21"),
-            };
-
-            var validationRulesReduced1 = validationRules1.Reduce();
-
-
-            Assert.True(validationRulesReduced1.HasValue);
-            Assert.True(validationRulesReduced1.Contains(value));
-
-
-
-            var validationRules2 = new List<Option<int>>
-            {
-                value.SomeWhen(v => v % 2 == 0, "Value must be even"),
-                value.SomeWhen(v => v / 2 == 77, "Value divided by two must equal 77"),
-            };
-
-            var validationRulesReduced2 = validationRules2.Reduce();
-
-
-            Assert.False(validationRulesReduced2.HasValue);
-            validationRulesReduced2.MatchNone(e => Assert.Equal("Value divided by two must equal 77", e.Message));
-
-
-
-            var validationRules3 = new List<Option<int>>
-            {
-                value.SomeWhen(v => (v & 1) == 1, "Value must be odd"),
-                value.SomeWhen(v => v / 2 == 77, "Value divided by two must equal 77"),
-            };
-
-            var validationRulesReduced3 = validationRules3.Reduce();
-
-
-            Assert.False(validationRulesReduced3.HasValue);
-            validationRulesReduced3.MatchNone(e => Assert.Equal("Value must be odd", e.Message));
-        }
-
-        [Fact]
-        public void Collections_Reduce_Lazy()
         {
             const int value = 42;
 
@@ -316,6 +270,98 @@
             };
 
             var validationRulesReduced4 = validationRules4.Reduce();
+
+            Assert.False(validationRulesReduced4.IsSuccessful);
+
+            Assert.True(validationRun1);
+            Assert.False(validationRun2);
+            Assert.False(validationRun3);
+            Assert.False(validationRun4);
+        }
+
+        [Fact]
+        public async Task Collections_Reduce_Async()
+        {
+            const int value = 42;
+
+            var validationRules1 = new List<LazyOptionAsync>
+            {
+                Optional.LazyAsync(() => Task.FromResult((value & 1) == 1), Success.Create("Value is odd"), "Value must be odd"),
+                Optional.LazyAsync(() => Task.FromResult(value / 2 == 77), Success.Create("Value divided by two is 77"), "Value divided by two must equal 77"),
+            };
+
+            var validationRulesReduced1 = await validationRules1.ReduceAsync();
+
+            Assert.False(validationRulesReduced1.IsSuccessful);
+            validationRulesReduced1.Match(
+                some: _ => Assert.True(false, "Failed"),
+                none: e => Assert.Equal("Value must be odd", e.Message)
+            );
+
+
+            var validationRules2 = new List<LazyOptionAsync>
+            {
+                Optional.LazyAsync(() => Task.FromResult(value % 2 == 0), Success.Create("Value is even"), "Value must be even"),
+                Optional.LazyAsync(() => Task.FromResult(value == 42), Success.Create("Value is 42"), "Value must be equal to 42"),
+            };
+
+            var validationRulesReduced2 = await validationRules2.ReduceAsync();
+
+            Assert.True(validationRulesReduced2.IsSuccessful);
+
+
+
+            var validationRules3 = new List<LazyOptionAsync>
+            {
+                Optional.LazyAsync(() => Task.FromResult(value % 2 == 0), Success.Create("Value is even"), "Value must be even"),
+                Optional.LazyAsync(() => Task.FromResult(value / 2 == 77), Success.Create("Value divided by two is 77"), "Value divided by two must equal 77"),
+            };
+
+            var validationRulesReduced3 = await validationRules3.ReduceAsync();
+
+            Assert.False(validationRulesReduced3.IsSuccessful);
+            validationRulesReduced3.Match(
+                some: _ => Assert.True(false, "Failed"),
+                none: e => Assert.Equal("Value divided by two must equal 77", e.Message)
+            );
+
+
+
+
+            bool validationRun1 = false, validationRun2 = false, validationRun3 = false, validationRun4 = false;
+
+            var validationRules4 = new List<LazyOptionAsync>
+            {
+                Optional.LazyAsync(() =>
+                {
+                    validationRun1 = true;
+
+                    return Task.FromResult((value & 1) == 1);
+                }, Success.Create("SUCCESS"), "ERROR"),
+
+                Optional.LazyAsync(() =>
+                {
+                    validationRun2 = true;
+
+                    return Task.FromResult((value & 1) == 1);
+                }, Success.Create("SUCCESS"), "ERROR"),
+
+                Optional.LazyAsync(() =>
+                {
+                    validationRun3 = true;
+
+                    return Task.FromResult((value & 1) == 1);
+                }, Success.Create("SUCCESS"), "ERROR"),
+
+                Optional.LazyAsync(() =>
+                {
+                    validationRun4 = true;
+
+                    return Task.FromResult((value & 1) == 1);
+                }, Success.Create("SUCCESS"), "ERROR"),
+            };
+
+            var validationRulesReduced4 = await validationRules4.ReduceAsync();
 
             Assert.False(validationRulesReduced4.IsSuccessful);
 

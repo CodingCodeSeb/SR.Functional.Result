@@ -18,15 +18,10 @@
             return new ExceptionalError(exception.Message, exception);
         }
 
-        public static ExceptionalError Create(string message, Exception exception)
-        {
-            return new ExceptionalError(message, exception);
-        }
-
         protected override ReasonStringBuilder GetReasonStringBuilder()
         {
-            return base.GetReasonStringBuilder()
-                .WithInfo(nameof(Exception), Exception.ToString());
+            return new ReasonStringBuilder()
+                .WithInfoNoQuotes("", $"{Exception.GetType().Name}: '{Message}'");
         }
     }
 }

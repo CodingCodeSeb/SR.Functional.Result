@@ -117,7 +117,7 @@
         /// Uses an alternative value if no existing value is present and attaches the specified success object.
         /// </summary>
         /// <param name="alternative">The alternative value.</param>
-        /// <param name="success">An object with data describing the reason or origin behind the presence of the optional value.</param>
+        /// <param name="success">An object with data describing the reason or origin behind the presence of the alternative optional value.</param>
         /// <returns>A new optional, containing either the existing or alternative value.</returns>
         public Option<TValue> Or(TValue alternative, Success success) => HasValue ? this : Optional.Some(alternative, success);
 
@@ -137,7 +137,7 @@
         /// Uses an alternative value if no existing value is present and attaches the specified success object.
         /// </summary>
         /// <param name="alternativeFactory">A factory function to create an alternative value.</param>
-        /// <param name="success">An object with data describing the reason or origin behind the presence of the optional value.</param>
+        /// <param name="success">An object with data describing the reason or origin behind the presence of the alternative optional value.</param>
         /// <returns>A new optional, containing either the existing or alternative value.</returns>
         public Option<TValue> Or(Func<TValue> alternativeFactory, Success success)
         {
@@ -276,34 +276,48 @@
         }
 
         /// <summary>
-        /// Transforms the inner value of an optional.
-        /// If the instance is empty, an empty optional is returned.
+        /// Transforms the inner value of an optional. If the instance is empty, an empty optional is returned.
         /// </summary>
         /// <param name="mapping">The transformation function.</param>
+        /// <param name="childError">If the resulting optional is empty, sets its error as the direct reason to the specified subsequent error.<para>Example: "Failed to create object" (child error), Caused by: "The name property cannot be null" (antecedent empty optional)</para></param>
         /// <returns>The transformed optional.</returns>
-        public Option<TResult> Map<TResult>(Func<TValue, TResult> mapping)
+        public Option<TResult> Map<TResult>(Func<TValue, TResult> mapping, Error childError = null)
         {
             if (mapping == null) throw new ArgumentNullException(nameof(mapping));
 
+            Func<Error, Option<TResult>> errorFunc = Optional.None<TResult>;
+
+            if (childError != null)
+            {
+                errorFunc = e => Optional.None<TResult>(childError.CausedBy(e));
+            }
+
             return Match(
-                some: value => Optional.Some(mapping(value)),
-                none: Optional.None<TResult>
+                some: v => Optional.Some(mapping(v)),
+                none: errorFunc
             );
         }
 
         /// <summary>
-        /// Transforms the inner value of an optional.
-        /// If the instance is empty, an empty optional is returned.
+        /// Transforms the inner value of an optional. If the instance is empty, an empty optional is returned.
         /// </summary>
         /// <param name="mapping">The transformation function.</param>
+        /// <param name="childError">If the resulting optional is empty, sets its error as the direct reason to the specified subsequent error.<para>Example: "Failed to create object" (child error), Caused by: "The name property cannot be null" (antecedent empty optional)</para></param>
         /// <returns>The transformed optional.</returns>
-        public Option<TResult> Map<TResult>(Func<TValue, Success, TResult> mapping)
+        public Option<TResult> Map<TResult>(Func<TValue, Success, TResult> mapping, Error childError = null)
         {
             if (mapping == null) throw new ArgumentNullException(nameof(mapping));
 
+            Func<Error, Option<TResult>> errorFunc = Optional.None<TResult>;
+
+            if (childError != null)
+            {
+                errorFunc = e => Optional.None<TResult>(childError.CausedBy(e));
+            }
+
             return Match(
-                some: (value, success) => Optional.Some(mapping(value, success)),
-                none: Optional.None<TResult>
+                some: (v, s) => Optional.Some(mapping(v, s)),
+                none: errorFunc
             );
         }
 
@@ -311,9 +325,9 @@
         /// Transforms the inner value of an optional into another optional. The result is flattened, and if either is empty, an empty optional is returned.
         /// </summary>
         /// <param name="mapping">The transformation function.</param>
-        /// <param name="error">An error object to prepend to the resulting optional in case it is empty.<para>Specify null to simply copy the original error object with no additional reason message.</para></param>
+        /// <param name="childError">If the resulting optional is empty, sets its error as the direct reason to the specified subsequent error.<para>Example: "Failed to create object" (child error), Caused by: "The name property cannot be null" (antecedent empty optional)</para></param>
         /// <returns>The transformed optional.</returns>
-        public Option<TResult> FlatMap<TResult>(Func<TValue, Option<TResult>> mapping, Error error = null)
+        public Option<TResult> FlatMap<TResult>(Func<TValue, Option<TResult>> mapping, Error childError = null)
         {
             if (mapping == null) throw new ArgumentNullException(nameof(mapping));
 
@@ -325,15 +339,15 @@
 
                 result.MatchNone(e =>
                 {
-                    if (error != null)
+                    if (childError != null)
                     {
-                        result = Optional.None<TResult>(error.CausedBy(e));
+                        result = Optional.None<TResult>(childError.CausedBy(e));
                     }
                 });
             }
             else
             {
-                result = Optional.None<TResult>(Error);
+                result = Optional.None<TResult>(childError != null ? childError.CausedBy(Error) : Error);
             }
 
             return result;
@@ -343,9 +357,9 @@
         /// Transforms the inner value of an optional into another optional. The result is flattened, and if either is empty, an empty optional is returned.
         /// </summary>
         /// <param name="mapping">The transformation function.</param>
-        /// <param name="error">An error object to prepend to the resulting optional in case it is empty.<para>Specify null to simply copy the original error object with no additional reason message.</para></param>
+        /// <param name="childError">If the resulting optional is empty, sets its error as the direct reason to the specified subsequent error.<para>Example: "Failed to create object" (child error), Caused by: "The name property cannot be null" (antecedent empty optional)</para></param>
         /// <returns>The transformed optional.</returns>
-        public Option<TResult> FlatMap<TResult>(Func<TValue, Success, Option<TResult>> mapping, Error error = null)
+        public Option<TResult> FlatMap<TResult>(Func<TValue, Success, Option<TResult>> mapping, Error childError = null)
         {
             if (mapping == null) throw new ArgumentNullException(nameof(mapping));
 
@@ -357,40 +371,57 @@
 
                 result.MatchNone(e =>
                 {
-                    if (error != null)
+                    if (childError != null)
                     {
-                        result = Optional.None<TResult>(error.CausedBy(e));
+                        result = Optional.None<TResult>(childError.CausedBy(e));
                     }
                 });
             }
             else
             {
-                result = Optional.None<TResult>(Error);
+                result = Optional.None<TResult>(childError != null ? childError.CausedBy(Error) : Error);
             }
 
             return result;
         }
 
         /// <summary>
-        /// Empties an optional and attaches an error object if the specified predicate is not satisfied.
+        /// If the current optional is empty, sets its error as the direct reason to the specified subsequent error.
+        /// <para>Example: "Failed to create object" (child error), Caused by: "The name property cannot be null" (antecedent empty optional)</para>
         /// </summary>
-        /// <param name="predicate">The predicate.</param>
-        /// <param name="predicateFailure">An error object with data describing why the predicate failed.</param>
-        /// <param name="error">An error object stating that the predicate failed to execute in case the optional is empty.<para>Specify null to simply copy the original error object with no additional reason message.</para></param>
-        /// <returns>The filtered optional.</returns>
-        public Option<TValue> Filter(Predicate<TValue> predicate, Error predicateFailure, Error error = null)
+        /// <param name="childError">The error object to attach the empty optional's error object to.</param>
+        public Option<TValue> FlatMapNone(Error childError)
         {
-            return Filter(predicate, v => predicateFailure, error);
+            if (childError == null) throw new ArgumentNullException(nameof(childError));
+
+            if (!HasValue)
+            {
+                return Optional.None<TValue>(childError.CausedBy(this));
+            }
+
+            return this;
         }
 
         /// <summary>
         /// Empties an optional and attaches an error object if the specified predicate is not satisfied.
         /// </summary>
         /// <param name="predicate">The predicate.</param>
-        /// <param name="predicateFailure">A function that returns an error object with data describing why the predicate failed.</param>
-        /// <param name="error">An error object stating that the predicate failed to execute in case the optional is empty.<para>Specify null to simply copy the original error object with no additional reason message.</para></param>
+        /// <param name="predicateFailure">An error object describing why the predicate failed.<para>Example: "Value must be greater than 10. Was 2."</para></param>
+        /// <param name="childError">An error object describing that the predicate potentially failed to execute because the optional was empty.<para>Example: "Predicate never executed" (child error), Caused by: "The name property cannot be null" (antecedent empty optional)</para></param>
         /// <returns>The filtered optional.</returns>
-        public Option<TValue> Filter(Predicate<TValue> predicate, Func<TValue, Error> predicateFailure, Error error = null)
+        public Option<TValue> Filter(Predicate<TValue> predicate, Error predicateFailure, Error childError = null)
+        {
+            return Filter(predicate, v => predicateFailure, childError);
+        }
+
+        /// <summary>
+        /// Empties an optional and attaches an error object if the specified predicate is not satisfied.
+        /// </summary>
+        /// <param name="predicate">The predicate.</param>
+        /// <param name="predicateFailure">An error object describing why the predicate failed.<para>Example: "Value must be greater than 10. Was 2."</para></param>
+        /// <param name="childError">An error object describing that the predicate potentially failed to execute because the optional was empty.<para>Example: "Predicate never executed" (child error), Caused by: "The name property cannot be null" (antecedent empty optional)</para></param>
+        /// <returns>The filtered optional.</returns>
+        public Option<TValue> Filter(Predicate<TValue> predicate, Func<TValue, Error> predicateFailure, Error childError = null)
         {
             if (predicate == null) throw new ArgumentNullException(nameof(predicate));
 
@@ -399,7 +430,7 @@
                 return predicate(value) ? this : Optional.None<TValue>(predicateFailure(value));
             }
 
-            return Optional.None<TValue>(error?.CausedBy(Error) ?? Error);
+            return Optional.None<TValue>(childError?.CausedBy(Error) ?? Error);
         }
 
         /// <summary>
@@ -407,8 +438,12 @@
         /// </summary>
         /// <param name="error">An error object with data describing why the optional is missing its value.</param>
         /// <returns>The filtered optional.</returns>
-        public Option<TValue> NotNull(Error error) => HasValue && Value == null ? Optional.None<TValue>(error) : this;
+        public Option<TValue> NotNull(Error error)
+        {
+            if (error == null) throw new ArgumentNullException(nameof(error));
 
+            return HasValue && Value == null ? Optional.None<TValue>(error) : this;
+        }
 
 
         /// <summary>

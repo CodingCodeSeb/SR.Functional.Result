@@ -4,6 +4,7 @@
 
     using System;
     using System.Collections.Generic;
+    using System.Threading.Tasks;
 
 
     /// <summary>
@@ -172,31 +173,84 @@
         /// Transforms the optional into another optional. The result is flattened, and if either optional's outcome is unsuccessful, an unsuccessful optional is returned.
         /// </summary>
         /// <param name="mapping">The transformation function.</param>
+        /// <param name="childError">If the resulting optional's outcome is unsuccessful, sets its error as the direct reason to the specified subsequent error.<para>Example: "Operation failed" (child error), Caused by: "The name property cannot be null" (antecedent empty optional)</para></param>
         /// <returns>The transformed optional.</returns>
-        public Option FlatMap(Func<Option> mapping)
+        public Option FlatMap(Func<Option> mapping, Error childError = null)
         {
             if (mapping == null) throw new ArgumentNullException(nameof(mapping));
 
-            return Match(
-                some: mapping,
-                none: Optional.None
-            );
+            Option result;
+
+            if (IsSuccessful)
+            {
+                result = mapping();
+
+                if (!result.IsSuccessful)
+                {
+                    if (childError != null)
+                    {
+                        result = Optional.None(childError.CausedBy(result));
+                    }
+                }
+            }
+            else
+            {
+                result = Optional.None(childError != null ? childError.CausedBy(this) : Error);
+            }
+
+            return result;
         }
 
         /// <summary>
         /// Transforms the optional into another optional. The result is flattened, and if either optional's outcome is unsuccessful, an unsuccessful optional is returned.
         /// </summary>
         /// <param name="mapping">The transformation function.</param>
+        /// <param name="childError">If the resulting optional's outcome is unsuccessful, sets its error as the direct reason to the specified subsequent error.<para>Example: "Operation failed" (child error), Caused by: "The name property cannot be null" (antecedent empty optional)</para></param>
         /// <returns>The transformed optional.</returns>
-        public Option FlatMap(Func<Success, Option> mapping)
+        public Option FlatMap(Func<Success, Option> mapping, Error childError = null)
         {
             if (mapping == null) throw new ArgumentNullException(nameof(mapping));
 
-            return Match(
-                some: mapping,
-                none: Optional.None
-            );
+            Option result;
+
+            if (IsSuccessful)
+            {
+                result = mapping(Success);
+
+                if (!result.IsSuccessful)
+                {
+                    if (childError != null)
+                    {
+                        result = Optional.None(childError.CausedBy(result));
+                    }
+                }
+            }
+            else
+            {
+                result = Optional.None(childError != null ? childError.CausedBy(this) : Error);
+            }
+
+            return result;
         }
+
+        /// <summary>
+        /// If the current optional's outcome is unsuccessful, sets its error as the direct reason to the specified subsequent error.
+        /// <para>Example: "Operation failed" (child error), Caused by: "Timed out while connecting to service" (antecedent optional with an unsuccessful outcome)</para>
+        /// </summary>
+        /// <param name="childError">The error object to attach the unsuccessful optional's error object to.</param>
+        public Option FlatMapNone(Error childError)
+        {
+            if (childError == null) throw new ArgumentNullException(nameof(childError));
+
+            if (!IsSuccessful)
+            {
+                return Optional.None(childError.CausedBy(this));
+            }
+
+            return this;
+        }
+
+
 
         /// <summary>
         /// Returns a string that represents the current optional.
@@ -206,7 +260,7 @@
         {
             if (IsSuccessful)
             {
-                return $"Some({(Success.Message != "" || Success.Metadata.Count > 0 ? $" | {Success}" : "")})";
+                return $"Some({(Success.Message != "" || Success.Metadata.Count > 0 ? Success.ToString() : "")})";
             }
 
             return $"None{(Error != null ? $"(Error={Error})" : "")}";

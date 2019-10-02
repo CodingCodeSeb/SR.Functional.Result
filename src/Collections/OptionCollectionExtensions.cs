@@ -1,11 +1,13 @@
 ﻿namespace Ultimately.Collections
 {
+    using Async;
     using Reasons;
     using Utilities;
 
     using System;
     using System.Collections.Generic;
     using System.Linq;
+    using System.Threading.Tasks;
 
 
     public static class OptionCollectionExtensions
@@ -379,26 +381,7 @@
         }
 
         /// <summary>
-        /// Aggregates a sequence of options into one result, short-circuiting as soon as an empty optional is hit.
-        /// </summary>
-        /// <typeparam name="TValue">The type of the optional value.</typeparam>
-        /// <param name="optionsCollection">Sequence of <see cref="Option{T}"/>s to reduce.</param>
-        public static Option<TValue> Reduce<TValue>(this IEnumerable<Option<TValue>> optionsCollection)
-        {
-            return optionsCollection.Aggregate((o1, o2) => o1.FlatMap(_ => o2));
-        }
-
-        /// <summary>
-        /// Aggregates a sequence of options into one result, short-circuiting as soon as an empty optional is hit.
-        /// </summary>
-        /// <param name="optionsCollection">Sequence of <see cref="Option"/>s to reduce.</param>
-        public static Option Reduce(this IEnumerable<Option> optionsCollection)
-        {
-            return optionsCollection.Aggregate((o1, o2) => o1.FlatMap(_ => o2));
-        }
-
-        /// <summary>
-        /// Aggregates a sequence of deferred options into one result, sequentially processing each option and short-circuiting as soon as a result resolves into an unsuccessful outcome.
+        /// Aggregates a sequence of deferred options into one result, sequentially processing each option and short-circuiting the moment a result resolves into an unsuccessful outcome.
         /// </summary>
         /// <param name="lazyOptionsCollection">Sequence of <see cref="LazyOption"/>s to reduce.</param>
         public static Option Reduce(this IEnumerable<LazyOption> lazyOptionsCollection)
@@ -406,9 +389,36 @@
             return lazyOptionsCollection.Aggregate(Optional.Some(), (v1, v2) => v1.FlatMap(_ => v2.Resolve()));
         }
 
+        /// <summary>
+        /// Aggregates a sequence of asynchronously deferred options into one result, sequentially processing each option and short-circuiting the moment a result resolves into an unsuccessful outcome.
+        /// </summary>
+        /// <param name="lazyOptionsCollection">Sequence of <see cref="LazyOptionAsync"/> to reduce.</param>
+        public static async Task<Option> ReduceAsync(this IEnumerable<LazyOptionAsync> lazyOptionsCollection)
+        {
+            return await AggregateAsync(lazyOptionsCollection, Optional.Some(), async (v1, v2) => await v1.FlatMapAsync(_ => v2.Resolve()));
+
+            async Task<TAccumulate> AggregateAsync<TSource, TAccumulate>(IEnumerable<TSource> source, TAccumulate result, Func<TAccumulate, TSource, Task<TAccumulate>> func)
+            {
+                using (var enumerator = source.GetEnumerator())
+                {
+                    if (!enumerator.MoveNext())
+                    {
+                        throw new InvalidOperationException("Sequence contains no elements");
+                    }
+
+                    do
+                    {
+                        result = await func(result, enumerator.Current);
+                    } while (enumerator.MoveNext());
+
+                    return result;
+                }
+            }
+        }
+
 
         /// <summary>
-        /// Transforms each item in a sequence according to the specified option-returning transformation function, short-circuiting as soon as a function iteration results in an empty optional.
+        /// Transforms each item in a sequence according to the specified option-returning transformation function, short-circuiting the moment a function iteration results in an empty optional.
         /// </summary>
         /// <typeparam name="TSource">The type of the source item to transform.</typeparam>
         /// <typeparam name="TResult">The type of the resulting optional value.</typeparam>
