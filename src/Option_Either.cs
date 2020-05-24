@@ -3,7 +3,9 @@
     using Reasons;
 
     using System;
+    using System.Collections;
     using System.Collections.Generic;
+    using System.Linq;
 
 
     /// <summary>
@@ -454,7 +456,25 @@
         {
             if (HasValue)
             {
-                return $"Some({Value}{(Success.Message != "" || Success.Metadata.Count > 0 ? $" | {Success}" : "")})";
+                string valueString = "";
+
+                if (Value == null) valueString = "null";
+                else
+                {
+                    if (Value is ICollection c) valueString = $"Count = {c.Count}";
+                    else if (typeof(TValue) == typeof(IReadOnlyCollection<>))
+                    {
+                        var valueType = Value.GetType().GetInterfaces().Single(i => i == typeof(IReadOnlyCollection<>));
+
+                        valueString = $"Count = {valueType.GetProperty("Count").GetValue(valueType)}";
+                    }
+                    else
+                    {
+                        valueString = Value.ToString();
+                    }
+                }
+
+                return $"Some({valueString}{(Success.Message != "" || Success.Metadata.Count > 0 ? $" | {Success}" : "")})";
             }
 
             return $"None{(Error != null ? $"(Error={Error})" : "")}";
