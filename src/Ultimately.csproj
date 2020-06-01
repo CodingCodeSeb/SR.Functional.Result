@@ -6,9 +6,9 @@
     <PackageTags>option optional some none maybe either null monad monadic result results resultful fluentresults functional pipeline pipelines</PackageTags>
     <PackageProjectUrl>https://github.com/silkfire/Ultimately</PackageProjectUrl>
     <Description>A robust option type for C#.</Description>
-    <Version>1.4.2</Version>
-    <AssemblyVersion>1.4.2.0</AssemblyVersion>
-    <PackageReleaseNotes>1.4.0 Added many more extension methods for increased flexibility</PackageReleaseNotes>
+    <Version>1.5.1</Version>
+    <AssemblyVersion>1.5.1.0</AssemblyVersion>
+    <PackageReleaseNotes>1.5.0 All structs are now properly readonly</PackageReleaseNotes>
   </PropertyGroup>
 
 </Project>

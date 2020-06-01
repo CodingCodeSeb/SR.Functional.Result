@@ -25,6 +25,19 @@
         public static Option Some(Success success) => new Option(true, success, null);
 
         /// <summary>
+        /// Creates an optional with a successful outcome by using the success object of the specified optional with a value.
+        /// <para>The provided optional cannot be empty.</para>
+        /// </summary>
+        /// <param name="some">An optional with a value whose success object to copy.</param>
+        /// <returns>An optional containing the specified value.</returns>
+        public static Option Some<TResult>(Option<TResult> some)
+        {
+            if (!some.HasValue) throw new ArgumentException("Source optional must have a value");
+
+            return new Option(true, some.Success, null);
+        }
+
+        /// <summary>
         /// Creates an optional with an unsuccessful outcome.
         /// </summary>
         /// <param name="message">A description of the error that caused the unsuccessful outcome.</param>
@@ -137,6 +150,34 @@
         public static Option<TValue> Some<TValue>(TValue value, Success success) => new Option<TValue>(true, value, success, null);
 
         /// <summary>
+        /// Wraps an existing value in an <see cref="Option{T}"/> instance with the success object of the specified optional.
+        /// <para>The outcome of the provided optional must be successful.</para>
+        /// </summary>
+        /// <param name="value">The value to be wrapped.</param>
+        /// <param name="some">A successful optional whose success object to copy.</param>
+        /// <returns>An optional containing the specified value.</returns>
+        public static Option<TValue> Some<TValue>(TValue value, Option some)
+        {
+            if (!some.IsSuccessful) throw new ArgumentException("Source optional must be successful");
+
+            return new Option<TValue>(true, value, some.Success, null);
+        }
+
+        /// <summary>
+        /// Wraps an existing value in an <see cref="Option{T}"/> instance with the success object of the specified optional.
+        /// <para>The provided optional cannot be empty.</para>
+        /// </summary>
+        /// <param name="value">The value to be wrapped.</param>
+        /// <param name="some">An optional with a value whose success object to copy.</param>
+        /// <returns>An optional containing the specified value.</returns>
+        public static Option<TValue> Some<TValue, TResult>(TValue value, Option<TResult> some)
+        {
+            if (!some.HasValue) throw new ArgumentException("Source optional must have a value");
+
+            return new Option<TValue>(true, value, some.Success, null);
+        }
+
+        /// <summary>
         /// Creates an empty <see cref="Option{TValue}"/> instance with a specified error message.
         /// </summary>
         /// <param name="message">A description of why the optional is missing its value.</param>
@@ -165,10 +206,7 @@
         /// <returns>An empty optional based on the specified optional with an unsuccessful outcome.</returns>
         public static Option<TValue> None<TValue>(Option none)
         {
-            if (none.IsSuccessful)
-            {
-                throw new ArgumentException("Source optional must be unsuccessful");
-            }
+            if (none.IsSuccessful) throw new ArgumentException("Source optional must be unsuccessful");
 
             return new Option<TValue>(false, default, null, none.Error);
         }
@@ -180,10 +218,7 @@
         /// <returns>An empty optional based on the specified empty optional.</returns>
         public static Option<TResult> None<TValue, TResult>(Option<TValue> none)
         {
-            if (none.HasValue)
-            {
-                throw new ArgumentException("Source optional must be empty");
-            }
+            if (none.HasValue) throw new ArgumentException("Source optional must be empty");
 
             return new Option<TResult>(false, default, null, none.Error);
         }

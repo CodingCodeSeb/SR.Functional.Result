@@ -86,8 +86,8 @@
             Assert.Equal("None(Error='No value')", Optional.None<int>(Error.Create("No value")).ToString());
             Assert.Equal("None(Error='No value', Caused by=Exception: 'An exception occurred')", Optional.None<int>("No value", new Exception("An exception occurred")).ToString());
 
-            Assert.Equal("Some()", Optional.Some<int?>(null).ToString());
-            Assert.Equal("Some()", Optional.Some<string>(null).ToString());
+            Assert.Equal("Some(null)", Optional.Some<int?>(null).ToString());
+            Assert.Equal("Some(null)", Optional.Some<string>(null).ToString());
 
             Assert.Equal("Some(1)", Optional.Some(1).ToString());
             Assert.Equal("Some(1)", Optional.Some<int?>(1).ToString());
@@ -462,8 +462,8 @@
         public void Either_Flatten()
         {
             var noneNone = Optional.None<Option<string>>("1");
-            var someNone = Optional.Some(Optional.None<string>("2"));
-            var someSome = Optional.Some(Optional.Some("a"));
+            var someNone = Optional.Some<Option<string>>(Optional.None<string>("2"));
+            var someSome = Optional.Some<Option<string>>(Optional.Some("a"));
 
             Assert.False(noneNone.HasValue);
             Assert.False(noneNone.Flatten().HasValue);

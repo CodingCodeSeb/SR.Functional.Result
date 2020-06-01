@@ -13,7 +13,7 @@
     /// </summary>
     /// <typeparam name="TValue">The type of the value to be wrapped.</typeparam>
     [Serializable]
-    public struct Option<TValue>
+    public readonly struct Option<TValue>
     {
         /// <summary>
         /// Checks if a value is present.
@@ -385,6 +385,23 @@
             }
 
             return result;
+        }
+
+        /// <summary>
+        /// If the current optional has a value, sets its success reason as the direct reason to the specified subsequent success reason.
+        /// <para>Example: "Created object successfully" (child success reason), Anteceded by: "Property has a value" (antecedent optional with a value)</para>
+        /// </summary>
+        /// <param name="childSuccess">The success object to attach the non-empty optional's success object to.</param>
+        public Option<TValue> FlatMapSome(Success childSuccess)
+        {
+            if (childSuccess == null) throw new ArgumentNullException(nameof(childSuccess));
+
+            if (!HasValue)
+            {
+                return Optional.Some(Value, childSuccess.AntecededBy(this));
+            }
+
+            return this;
         }
 
         /// <summary>

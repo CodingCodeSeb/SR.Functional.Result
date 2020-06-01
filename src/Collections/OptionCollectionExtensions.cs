@@ -401,10 +401,7 @@
             {
                 using (var enumerator = source.GetEnumerator())
                 {
-                    if (!enumerator.MoveNext())
-                    {
-                        throw new InvalidOperationException("Sequence contains no elements");
-                    }
+                    if (!enumerator.MoveNext()) throw new InvalidOperationException("Sequence contains no elements");
 
                     do
                     {

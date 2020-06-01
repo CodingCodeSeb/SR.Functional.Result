@@ -7,7 +7,7 @@
 
     public class Success : Reason
     {
-        public static Success Default = new Success("");
+        public static Success Default => new Success("");
 
         public List<Success> Reasons { get; }
 
@@ -55,12 +55,24 @@
 
         public Success AntecededBy<TValue>(Option<TValue> some)
         {
-            if (some.HasValue)
+            if (!some.HasValue)
             {
                 throw new InvalidOperationException("The optional value cannot empty in order to access its success object");
             }
 
             some.MatchSome((_, s) => Reasons.Add(s));
+
+            return this;
+        }
+
+        public Success AntecededBy(Option some)
+        {
+            if (!some.IsSuccessful)
+            {
+                throw new InvalidOperationException("The optional value cannot unsuccessful in order to access its success object");
+            }
+
+            some.MatchSome(s => Reasons.Add(s));
 
             return this;
         }

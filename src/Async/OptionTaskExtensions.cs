@@ -1094,7 +1094,7 @@
 
             return await option.FlatMapAsync(mapping, childError);
         }
-
+        
         /// <summary>
         /// Transforms the value-optional into an optional with an outcome. The result is flattened, and if either the source optional is empty or the resulting optional's outcome is unsuccessful, an optional with an unsuccessful outcome is returned.
         /// </summary>
@@ -1110,6 +1110,48 @@
             var option = await optionTask;
 
             return await option.FlatMapAsync(mapping, childError);
+        }
+
+        /// <summary>
+        /// If the given optional's outcome is unsuccessful, sets its error as the direct reason to the specified subsequent error.
+        /// <para>Example: "Operation succeeded" (child success reason), Anteceded by: "Sub-operation successful" (antecedent successful optional)</para>
+        /// </summary>
+        /// <param name="optionTask">The optional task to source original error from.</param>
+        /// <param name="childSuccess">The error object to attach the unsuccessful optional's error object to.</param>
+        public static async Task<Option> FlatMapSomeAsync(this Task<Option> optionTask, Success childSuccess)
+        {
+            if (optionTask == null) throw new ArgumentNullException(nameof(optionTask));
+            if (childSuccess == null) throw new ArgumentNullException(nameof(childSuccess));
+
+            var option = await optionTask;
+
+            if (option.IsSuccessful)
+            {
+                return Optional.Some(childSuccess.AntecededBy(option));
+            }
+
+            return option;
+        }
+
+        /// <summary>
+        /// If the given optional is empty, sets its error as the direct reason to the specified subsequent error.
+        /// <para>Example: "Created object successfully" (child success reason), Anteceded by: "Property has a value" (antecedent optional with a value)</para>
+        /// </summary>
+        /// <param name="optionTask">The optional task to transform.</param>
+        /// <param name="childSuccess">The error object to attach the empty optional's error object to.</param>
+        public static async Task<Option<TValue>> FlatMapSomeAsync<TValue>(this Task<Option<TValue>> optionTask, Success childSuccess)
+        {
+            if (optionTask == null) throw new ArgumentNullException(nameof(optionTask));
+            if (childSuccess == null) throw new ArgumentNullException(nameof(childSuccess));
+
+            var option = await optionTask;
+
+            if (option.HasValue)
+            {
+                return Optional.Some(option.Value, childSuccess.AntecededBy(option));
+            }
+
+            return option;
         }
 
         /// <summary>

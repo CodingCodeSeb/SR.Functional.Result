@@ -4,13 +4,12 @@
 
     using System;
     using System.Collections.Generic;
-    using System.Threading.Tasks;
 
 
     /// <summary>
     /// An optional that represents either a successful or an unsuccessful outcome.
     /// </summary>
-    public struct Option
+    public readonly struct Option
     {
         /// <summary>
         /// Checks whether outcome is successful.
@@ -33,11 +32,11 @@
         /// Returns an enumerator for the optional.
         /// </summary>
         /// <returns>The enumerator.</returns>
-        public IEnumerator<object> GetEnumerator()
+        public IEnumerator<Success> GetEnumerator()
         {
             if (IsSuccessful)
             {
-                yield return null;
+                yield return Success;
             }
         }
 
@@ -231,6 +230,23 @@
             }
 
             return result;
+        }
+
+        /// <summary>
+        /// If the current optional is successful, sets its success reason as the direct reason to the specified subsequent success reason.
+        /// <para>Example: "Operation succeeded" (child success reason), Anteceded by: "Sub-operation successful" (antecedent successful optional)</para>
+        /// </summary>
+        /// <param name="childSuccess">The success object to attach the succesful optional's success object to.</param>
+        public Option FlatMapSome(Success childSuccess)
+        {
+            if (childSuccess == null) throw new ArgumentNullException(nameof(childSuccess));
+
+            if (!IsSuccessful)
+            {
+                return Optional.Some(childSuccess.AntecededBy(this));
+            }
+
+            return this;
         }
 
         /// <summary>

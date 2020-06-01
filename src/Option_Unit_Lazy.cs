@@ -9,7 +9,7 @@
     /// <summary>
     /// Wraps a predicate that returns a successful or an unsuccessful outcome.
     /// </summary>
-    public struct LazyOption
+    public readonly struct LazyOption
     {
         internal Func<bool> OutcomeDelegate { get; }
 
@@ -39,7 +39,7 @@
     /// <summary>
     /// Wraps a predicate task that returns a successful or an unsuccessful outcome.
     /// </summary>
-    public struct LazyOptionAsync
+    public readonly struct LazyOptionAsync
     {
         internal Func<Task<bool>> OutcomeDelegate { get; }
 
