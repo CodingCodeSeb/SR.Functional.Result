@@ -1,14 +1,14 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>netstandard2.0</TargetFramework>
+    <TargetFramework>net5.0</TargetFramework>
     <Authors>Gabriel Bider, Nils Lück, Michael Altmann</Authors>
     <PackageTags>option optional some none maybe either null monad monadic result results resultful fluentresults functional pipeline pipelines</PackageTags>
     <PackageProjectUrl>https://github.com/silkfire/Ultimately</PackageProjectUrl>
     <Description>A robust option type for C#.</Description>
-    <Version>1.5.1</Version>
-    <AssemblyVersion>1.5.1.0</AssemblyVersion>
-    <PackageReleaseNotes>1.5.0 All structs are now properly readonly</PackageReleaseNotes>
+    <Version>2.0.0</Version>
+    <AssemblyVersion>2.0.0.0</AssemblyVersion>
+    <PackageReleaseNotes>2.0.0 Now only supports .NET 5</PackageReleaseNotes>
   </PropertyGroup>
 
 </Project>
