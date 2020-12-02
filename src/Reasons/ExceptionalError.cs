@@ -3,7 +3,7 @@
     using System;
 
 
-    public class ExceptionalError : Error
+    public sealed class ExceptionalError : Error
     {
         public Exception Exception { get; }
 
@@ -20,8 +20,7 @@
 
         protected override ReasonStringBuilder GetReasonStringBuilder()
         {
-            return new ReasonStringBuilder()
-                .WithInfoNoQuotes("", $"{Exception.GetType().Name}: '{Message}'");
+            return new ReasonStringBuilder().WithInfoNoQuotes("", $"{Exception.GetType().Name}: '{Message}'");
         }
     }
 }

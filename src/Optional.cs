@@ -53,6 +53,13 @@
         public static Option None(string message, Exception exception) => None(Error.Create(message).CausedBy(exception));
 
         /// <summary>
+        /// Creates an optional with an unsuccessful outcome from an exception.
+        /// </summary>
+        /// <param name="exception">An exception instance to create an optional with an unsuccessful outcome from.</param>
+        /// <returns>An optional with an unsuccessful outcome.</returns>
+        public static Option None(Exception exception) => None(ExceptionalError.Create(exception));
+
+        /// <summary>
         /// Creates an optional with an unsuccessful outcome.
         /// </summary>
         /// <param name="error">An error object with data describing what caused the unsuccessful outcome.</param>
@@ -191,6 +198,13 @@
         /// <param name="exception">An exception instance to attach to error property of the empty optional.</param>
         /// <returns>An empty optional.</returns>
         public static Option<TValue> None<TValue>(string message, Exception exception) => None<TValue>(Error.Create(message).CausedBy(exception));
+
+        /// <summary>
+        /// Creates an empty <see cref="Option{TValue}"/> instance an exception.
+        /// </summary>
+        /// <param name="exception">An exception instance to create an empty optional from.</param>
+        /// <returns>An empty optional.</returns>
+        public static Option<TValue> None<TValue>(Exception exception) => None<TValue>(ExceptionalError.Create(exception));
 
         /// <summary>
         /// Creates an empty <see cref="Option{TValue}"/> instance with a specified error object.

@@ -128,12 +128,30 @@
                 transformFunc = s => s;
             }
 
-            var errorMessageChain = GetErrorMessageChain(new List<string>(), this, depth).Select(transformFunc);
+            var errorMessageChain = GetErrorMessageChain(this, depth).Select(transformFunc);
 
             return string.Join(separator, errorMessageChain);
         }
 
-        private static List<string> GetErrorMessageChain(List<string> messages, Error error, byte depth = 0)
+        /// <summary>
+        /// Formats the error object as a one-line string.
+        /// </summary>
+        /// <param name="separator">A string to delimit the indivudual error messages with.</param>
+        /// <param name="depth">The amount of levels to traverse in the error chain. Zero means infinite depth.</param>
+        /// <param name="transformFunc">A function to transform each message according to. <para>The second argument specifies the zero-based index of the message in the error chain and the third argument is <see langword="true"/> when the message is the last one in the chain.</para></param>
+        public string Print(string separator = " → ", byte depth = 0, Func<string, int, bool, string> transformFunc = null)
+        {
+            if (transformFunc == null)
+            {
+                transformFunc = (m, _, __) => m;
+            }
+
+            var errorMessageChain = GetErrorMessageChain(this, depth).ToList();
+
+            return string.Join(separator, errorMessageChain.Select((m, i) => transformFunc(m, i, i == errorMessageChain.Count - 1)));
+        }
+
+        private static IEnumerable<string> GetErrorMessageChain(Error error, byte depth = 0)
         {
             var currentDepth = 0;
 
@@ -141,10 +159,10 @@
             {
                 if (error == null || depth > 0 && currentDepth == depth)
                 {
-                    return messages;
+                    yield break;
                 }
 
-                messages.Add(error.Message);
+                yield return error.Message;
 
                 error = error.Reasons.FirstOrDefault();
 
@@ -155,10 +173,9 @@
 
         protected override ReasonStringBuilder GetReasonStringBuilder()
         {
-            return new ReasonStringBuilder()
-                .WithInfo("", Message)
-                .WithInfoNoQuotes(nameof(Metadata), string.Join("; ", Metadata.Select(kvp => $"{kvp.Key}: {kvp.Value}")))
-                .WithInfoNoQuotes("Caused by", $"{string.Join(" ⁎ ", Reasons)}");
+            return new ReasonStringBuilder().WithInfo("", Message)
+                                            .WithInfoNoQuotes(nameof(Metadata), string.Join("; ", Metadata.Select(kvp => $"{kvp.Key}: {kvp.Value}")))
+                                            .WithInfoNoQuotes("Caused by", $"{string.Join(" ⁎ ", Reasons)}");
         }
     }
 }
