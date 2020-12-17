@@ -8,7 +8,7 @@
     public class ReasonStringBuilder
     {
         private  string _reasonType = string.Empty;
-        private readonly List<string> _infoStrings = new List<string>();
+        private readonly List<string> _infoStrings = new();
 
         public ReasonStringBuilder WithReasonType(Type type)
         {

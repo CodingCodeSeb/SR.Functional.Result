@@ -22,7 +22,7 @@
         /// </summary>
         /// <param name="success">A success object with data describing the successful outcome.</param>
         /// <returns>An optional with a successful outcome.</returns>
-        public static Option Some(Success success) => new Option(true, success, null);
+        public static Option Some(Success success) => new(true, success, null);
 
         /// <summary>
         /// Creates an optional with a successful outcome by using the success object of the specified optional with a value.
@@ -64,7 +64,7 @@
         /// </summary>
         /// <param name="error">An error object with data describing what caused the unsuccessful outcome.</param>
         /// <returns>An optional with an unsuccessful outcome.</returns>
-        public static Option None(Error error) => new Option(false, null, error);
+        public static Option None(Error error) => new(false, null, error);
 
         /// <summary>
         /// Creates an optional with an unsuccessful outcome by using the error object of an empty optional.
@@ -138,7 +138,7 @@
         /// </summary>
         /// <param name="value">The value to be wrapped.</param>
         /// <returns>An optional containing the specified value.</returns>
-        public static Option<TValue> Some<TValue>(TValue value) => new Option<TValue>(true, value, Success.Create(""), null);
+        public static Option<TValue> Some<TValue>(TValue value) => new(true, value, Success.Create(""), null);
 
         /// <summary>
         /// Wraps an existing value in an <see cref="Option{T}"/> instance with a specified success message.
@@ -146,7 +146,7 @@
         /// <param name="value">The value to be wrapped.</param>
         /// <param name="successMessage">A message describing the reason or origin behind the presence of the optional value.</param>
         /// <returns>An optional containing the specified value.</returns>
-        public static Option<TValue> Some<TValue>(TValue value, string successMessage) => new Option<TValue>(true, value, Success.Create(successMessage), null);
+        public static Option<TValue> Some<TValue>(TValue value, string successMessage) => new(true, value, Success.Create(successMessage), null);
 
         /// <summary>
         /// Wraps an existing value in an <see cref="Option{T}"/> instance with a specified success object.
@@ -154,7 +154,7 @@
         /// <param name="value">The value to be wrapped.</param>
         /// <param name="success">An object with data describing the reason or origin behind the presence of the optional value.</param>
         /// <returns>An optional containing the specified value.</returns>
-        public static Option<TValue> Some<TValue>(TValue value, Success success) => new Option<TValue>(true, value, success, null);
+        public static Option<TValue> Some<TValue>(TValue value, Success success) => new(true, value, success, null);
 
         /// <summary>
         /// Wraps an existing value in an <see cref="Option{T}"/> instance with the success object of the specified optional.
@@ -200,7 +200,7 @@
         public static Option<TValue> None<TValue>(string message, Exception exception) => None<TValue>(Error.Create(message).CausedBy(exception));
 
         /// <summary>
-        /// Creates an empty <see cref="Option{TValue}"/> instance an exception.
+        /// Creates an empty <see cref="Option{TValue}"/> instance with the specified exception.
         /// </summary>
         /// <param name="exception">An exception instance to create an empty optional from.</param>
         /// <returns>An empty optional.</returns>
@@ -211,7 +211,7 @@
         /// </summary>
         /// <param name="error">An error object with data describing why the optional is missing its value.</param>
         /// <returns>An empty optional.</returns>
-        public static Option<TValue> None<TValue>(Error error) => new Option<TValue>(false, default, null, error);
+        public static Option<TValue> None<TValue>(Error error) => new(false, default, null, error);
 
         /// <summary>
         /// Creates an empty optional with the error object of an optional with an unsuccessful outcome.
@@ -260,7 +260,7 @@
         /// <returns>A deferred optional whose outcome depends on the satisfaction of the provided predicate.</returns>
         public static LazyOption Lazy(Func<bool> predicate, Success success, Error error)
         {
-            return new LazyOption(predicate, success, error);
+            return new(predicate, success, error);
         }
 
         /// <summary>
@@ -272,7 +272,7 @@
         /// <returns>A deferred optional whose outcome depends on the satisfaction of the provided predicate.</returns>
         public static LazyOptionAsync LazyAsync(Func<Task<bool>> predicateTask, Error error)
         {
-            return new LazyOptionAsync(predicateTask, Success.Default, error);
+            return new(predicateTask, Success.Default, error);
         }
 
         /// <summary>
@@ -285,7 +285,7 @@
         /// <returns>A deferred optional whose outcome depends on the satisfaction of the provided predicate.</returns>
         public static LazyOptionAsync LazyAsync(Func<Task<bool>> predicateTask, Success success, Error error)
         {
-            return new LazyOptionAsync(predicateTask, success, error);
+            return new(predicateTask, success, error);
         }
     }
 }

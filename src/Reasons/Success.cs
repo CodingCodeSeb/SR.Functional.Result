@@ -7,7 +7,7 @@
 
     public class Success : Reason
     {
-        public static Success Default => new Success("");
+        public static Success Default => new("");
 
         public List<Success> Reasons { get; }
 
@@ -30,12 +30,12 @@
 
         public static Success Create(string message)
         {
-            return new Success(message);
+            return new(message);
         }
 
         public static Success Create(string message, Success antecededBy)
         {
-            return new Success(message, antecededBy);
+            return new(message, antecededBy);
         }
 
 

@@ -15,7 +15,7 @@
 
         public static ExceptionalError Create(Exception exception)
         {
-            return new ExceptionalError(exception.Message, exception);
+            return new(exception.Message, exception);
         }
 
         protected override ReasonStringBuilder GetReasonStringBuilder()

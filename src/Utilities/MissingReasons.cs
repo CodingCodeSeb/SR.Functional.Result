@@ -9,7 +9,7 @@
     {
         // https://stackoverflow.com/a/1362899/633098
 
-        private static readonly Dictionary<Type, string> _typeAliases = new Dictionary<Type, string>
+        private static readonly Dictionary<Type, string> _typeAliases = new()
         {
             [typeof(byte)]    = "byte",
             [typeof(sbyte)]   = "sbyte",

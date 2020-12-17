@@ -8,7 +8,7 @@
 
     public class Error : Reason
     {
-        public static Error Default => new Error("");
+        public static Error Default => new("");
 
 
         public List<Error> Reasons { get; }
@@ -31,12 +31,12 @@
 
         public static Error Create(string message)
         {
-            return new Error(message);
+            return new(message);
         }
 
         public static Error Create(string message, Error causedBy)
         {
-            return new Error(message, causedBy);
+            return new(message, causedBy);
         }
 
 
