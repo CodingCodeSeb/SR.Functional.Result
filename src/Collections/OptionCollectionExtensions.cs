@@ -25,9 +25,9 @@
 
             foreach (var option in source)
             {
-                foreach (var (value, _) in option)
+                if (option.HasValue)
                 {
-                    yield return value;
+                    yield return option.Value;
                 }
             }
         }

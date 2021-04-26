@@ -116,12 +116,44 @@
         }
 
         /// <summary>
-        /// Formats the error object as a one-line string.
+        /// Formats the error object as a one-line string, using the → symbol as a separator and an infinite depth.
+        /// </summary>
+        public string Print()
+        {
+            var errorMessageChain = GetErrorMessageChain(this);
+
+            return string.Join(" → ", errorMessageChain);
+        }
+
+        /// <summary>
+        /// Formats the error object as a one-line string, using the specified symbol as a separator and an infinite depth.
         /// </summary>
         /// <param name="separator">A string to delimit the indivudual error messages with.</param>
+        public string Print(string separator)
+        {
+            var errorMessageChain = GetErrorMessageChain(this);
+
+            return string.Join(separator, errorMessageChain);
+        }
+
+        /// <summary>
+        /// Formats the error object as a one-line string, using the → symbol as a separator and using the specified depth value.
+        /// </summary>
         /// <param name="depth">The amount of levels to traverse in the error chain. Zero means infinite depth.</param>
+        public string Print(byte depth)
+        {
+            var errorMessageChain = GetErrorMessageChain(this, depth);
+
+            return string.Join(" → ", errorMessageChain);
+        }
+
+        /// <summary>
+        /// Formats the error object as a one-line string using the specified transformation function on each individual message.
+        /// </summary>
         /// <param name="transformFunc">A function to transform each message according to.</param>
-        public string Print(string separator = " → ", byte depth = 0, Func<string, string> transformFunc = null)
+        /// <param name="separator">A string to delimit the indivudual error messages with.</param>
+        /// <param name="depth">The amount of levels to traverse in the error chain. Zero means infinite depth.</param>
+        public string Print(Func<string, string> transformFunc, string separator = " → ", byte depth = 0)
         {
             if (transformFunc == null)
             {
@@ -134,12 +166,12 @@
         }
 
         /// <summary>
-        /// Formats the error object as a one-line string.
+        /// Formats the error object as a one-line string using the specified transformation function on each individual message.
         /// </summary>
+        /// <param name="transformFunc">A function to transform each message according to. <para>The second argument specifies the zero-based index of the message in the error chain and the third argument is <see langword="true"/> when the message is the last one in the chain.</para></param>
         /// <param name="separator">A string to delimit the indivudual error messages with.</param>
         /// <param name="depth">The amount of levels to traverse in the error chain. Zero means infinite depth.</param>
-        /// <param name="transformFunc">A function to transform each message according to. <para>The second argument specifies the zero-based index of the message in the error chain and the third argument is <see langword="true"/> when the message is the last one in the chain.</para></param>
-        public string Print(string separator = " → ", byte depth = 0, Func<string, int, bool, string> transformFunc = null)
+        public string Print(Func<string, int, bool, string> transformFunc, string separator = " → ", byte depth = 0)
         {
             if (transformFunc == null)
             {

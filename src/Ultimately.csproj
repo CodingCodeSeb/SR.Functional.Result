@@ -6,9 +6,9 @@
     <PackageTags>option optional some none maybe either null monad monadic result results resultful fluentresults functional pipeline pipelines</PackageTags>
     <PackageProjectUrl>https://github.com/silkfire/Ultimately</PackageProjectUrl>
     <Description>A robust option type for C#.</Description>
-    <Version>2.1.0</Version>
-    <AssemblyVersion>2.1.0.0</AssemblyVersion>
-    <PackageReleaseNotes>2.1.0 Added a few convenience methods</PackageReleaseNotes>
+    <Version>2.1.1</Version>
+    <AssemblyVersion>2.1.1.0</AssemblyVersion>
+    <PackageReleaseNotes>2.1.1 Added a few more overloads for printing errors</PackageReleaseNotes>
   </PropertyGroup>
 
 </Project>

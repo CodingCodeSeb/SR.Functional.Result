@@ -138,7 +138,7 @@
         /// </summary>
         /// <param name="value">The value to be wrapped.</param>
         /// <returns>An optional containing the specified value.</returns>
-        public static Option<TValue> Some<TValue>(TValue value) => new(true, value, Success.Create(""), null);
+        public static Option<TValue> Some<TValue>(TValue value) => new(true, value, Success.Default, null);
 
         /// <summary>
         /// Wraps an existing value in an <see cref="Option{T}"/> instance with a specified success message.
