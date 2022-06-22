@@ -139,7 +139,7 @@
         /// <summary>
         /// Formats the error object as a one-line string, using the → symbol as a separator and using the specified depth value.
         /// </summary>
-        /// <param name="depth">The amount of levels to traverse in the error chain. Zero means infinite depth.</param>
+        /// <param name="depth">The number of levels to traverse in the error chain. Zero means infinite depth.</param>
         public string Print(byte depth)
         {
             var errorMessageChain = GetErrorMessageChain(this, depth);
@@ -152,7 +152,7 @@
         /// </summary>
         /// <param name="transformFunc">A function to transform each message according to.</param>
         /// <param name="separator">A string to delimit the indivudual error messages with.</param>
-        /// <param name="depth">The amount of levels to traverse in the error chain. Zero means infinite depth.</param>
+        /// <param name="depth">The number of levels to traverse in the error chain. Zero means infinite depth.</param>
         public string Print(Func<string, string> transformFunc, string separator = " → ", byte depth = 0)
         {
             if (transformFunc == null)
@@ -170,7 +170,7 @@
         /// </summary>
         /// <param name="transformFunc">A function to transform each message according to. <para>The second argument specifies the zero-based index of the message in the error chain and the third argument is <see langword="true"/> when the message is the last one in the chain.</para></param>
         /// <param name="separator">A string to delimit the indivudual error messages with.</param>
-        /// <param name="depth">The amount of levels to traverse in the error chain. Zero means infinite depth.</param>
+        /// <param name="depth">The number of levels to traverse in the error chain. Zero means infinite depth.</param>
         public string Print(Func<string, int, bool, string> transformFunc, string separator = " → ", byte depth = 0)
         {
             if (transformFunc == null)
