@@ -1,6 +1,6 @@
-﻿namespace Ultimately.Tests
+﻿namespace SR.Functional.Result.Tests
 {
-    using Reasons;
+    using SR.Functional.Reasons;
 
     using Xunit;
 

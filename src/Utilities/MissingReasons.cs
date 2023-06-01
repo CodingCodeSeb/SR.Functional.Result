@@ -1,4 +1,4 @@
-﻿namespace Ultimately.Utilities
+﻿namespace SR.Functional.Utilities
 {
     using System;
     using System.Collections.Generic;

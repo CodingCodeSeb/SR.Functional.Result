@@ -1,4 +1,4 @@
-﻿namespace Ultimately.Reasons
+﻿namespace SR.Functional.Reasons
 {
     using System;
     using System.Collections.Generic;
@@ -54,26 +54,26 @@
             return this;
         }
 
-        public Error CausedBy<TValue>(Option<TValue> none)
+        public Error CausedBy<TValue>(Result<TValue> none)
         {
             if (none.HasValue)
             {
                 throw new InvalidOperationException("The optional value must be empty in order to access its error object");
             }
 
-            none.MatchNone(e => Reasons.Add(e));
+            none.MatchFail(e => Reasons.Add(e));
 
             return this;
         }
 
-        public Error CausedBy(Option none)
+        public Error CausedBy(Result none)
         {
             if (none.IsSuccessful)
             {
                 throw new InvalidOperationException("The optional's outcome must be unsuccessful in order to access its error object");
             }
 
-            none.MatchNone(e => Reasons.Add(e));
+            none.MatchFail(e => Reasons.Add(e));
 
             return this;
         }

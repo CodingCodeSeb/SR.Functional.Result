@@ -1,4 +1,4 @@
-﻿namespace Ultimately.Reasons
+﻿namespace SR.Functional.Reasons
 {
     using System;
     using System.Collections.Generic;

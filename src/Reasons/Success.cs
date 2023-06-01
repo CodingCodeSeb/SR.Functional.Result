@@ -1,4 +1,4 @@
-﻿namespace Ultimately.Reasons
+﻿namespace SR.Functional.Reasons
 {
     using System;
     using System.Collections.Generic;
@@ -53,26 +53,26 @@
             return this;
         }
 
-        public Success AntecededBy<TValue>(Option<TValue> some)
+        public Success AntecededBy<TValue>(Result<TValue> some)
         {
             if (!some.HasValue)
             {
                 throw new InvalidOperationException("The optional value cannot empty in order to access its success object");
             }
 
-            some.MatchSome((_, s) => Reasons.Add(s));
+            some.MatchSuccess((_, s) => Reasons.Add(s));
 
             return this;
         }
 
-        public Success AntecededBy(Option some)
+        public Success AntecededBy(Result some)
         {
             if (!some.IsSuccessful)
             {
                 throw new InvalidOperationException("The optional value cannot unsuccessful in order to access its success object");
             }
 
-            some.MatchSome(s => Reasons.Add(s));
+            some.MatchSuccess(s => Reasons.Add(s));
 
             return this;
         }
