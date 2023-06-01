@@ -32,6 +32,8 @@ public readonly struct Result<TValue>
         Error = error;
     }
 
+    public static implicit operator Result<TValue>(TValue value)
+        => Result.Success(value);
 
     /// <summary>
     /// Converts the current optional into an enumerable with one or zero elements.
