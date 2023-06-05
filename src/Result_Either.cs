@@ -9,7 +9,7 @@ using System.Linq;
 
 
 /// <summary>
-/// Wraps an optional value that may or may not exist depending on a predetermined set of business rules.
+/// Wraps an result value that may or may not exist depending on a predetermined set of business rules.
 /// </summary>
 /// <typeparam name="TValue">The type of the value to be wrapped.</typeparam>
 [Serializable]
@@ -18,55 +18,64 @@ public readonly struct Result<TValue>
     /// <summary>
     /// Checks if a value is present.
     /// </summary>
-    public bool HasValue { get; }
+    public bool IsSuccess { get; }
 
-    internal TValue Value { get; }
-    internal Success Success { get; }
-    internal Error Error { get; }
+    public TValue Value { get; }
+    public Success SuccessReason { get; }
+    public Error ErrorReason { get; }
 
     internal Result(bool hasValue, TValue value, Success success, Error error)
     {
-        HasValue = hasValue;
+        IsSuccess = hasValue;
         Value = value;
-        Success = success;
-        Error = error;
+        SuccessReason = success;
+        ErrorReason = error;
     }
 
     public static implicit operator Result<TValue>(TValue value)
         => Result.Success(value);
 
+    public static implicit operator Result<TValue>(Error error)
+        => Result.Fail<TValue>(error);
+
+    public static implicit operator Result<TValue>(string error)
+        => Result.Fail<TValue>(error);
+
+    public static implicit operator Result<TValue>(Exception exception)
+        => Result.Fail<TValue>(ExceptionalError.Create(exception));
+
     /// <summary>
-    /// Converts the current optional into an enumerable with one or zero elements.
+    /// Converts the current result into an enumerable with one or zero elements.
     /// </summary>
     /// <returns>A corresponding enumerable.</returns>
     public IEnumerable<TValue> ToEnumerable()
     {
-        if (HasValue)
+        if (IsSuccess)
         {
             yield return Value;
         }
     }
 
     /// <summary>
-    /// Returns an enumerator for the optional.
+    /// Returns an enumerator for the result.
     /// </summary>
     /// <returns>The enumerator.</returns>
     public IEnumerator<(TValue Value, Success Success)> GetEnumerator()
     {
-        if (HasValue)
+        if (IsSuccess)
         {
-            yield return (Value, Success);
+            yield return (Value, SuccessReason);
         }
     }
 
     /// <summary>
-    /// Determines if the current optional contains a specified value.
+    /// Determines if the current result contains a specified value.
     /// </summary>
     /// <param name="value">The value to locate.</param>
     /// <returns>A boolean indicating whether or not the value was found.</returns>
     public bool Contains(TValue value)
     {
-        if (HasValue)
+        if (IsSuccess)
         {
             if (Value == null)
             {
@@ -80,15 +89,15 @@ public readonly struct Result<TValue>
     }
 
     /// <summary>
-    /// Determines if the current optional contains a value satisfying a specified predicate.
+    /// Determines if the current result contains a value satisfying a specified predicate.
     /// </summary>
-    /// <param name="predicate">A predicate to test the optional value against.</param>
+    /// <param name="predicate">A predicate to test the result value against.</param>
     /// <returns>A boolean indicating whether or not the predicate was satisfied.</returns>
     public bool Exists(Predicate<TValue> predicate)
     {
         if (predicate == null) throw new ArgumentNullException(nameof(predicate));
 
-        return HasValue && predicate(Value);
+        return IsSuccess && predicate(Value);
     }
 
     /// <summary>
@@ -96,7 +105,7 @@ public readonly struct Result<TValue>
     /// </summary>
     /// <param name="alternative">The alternative value.</param>
     /// <returns>The existing or alternative value.</returns>
-    public TValue ValueOr(TValue alternative) => HasValue ? Value : alternative;
+    public TValue ValueOr(TValue alternative) => IsSuccess ? Value : alternative;
 
     /// <summary>
     /// Returns the existing value if present, or otherwise an alternative value.
@@ -107,66 +116,66 @@ public readonly struct Result<TValue>
     {
         if (alternativeFactory == null) throw new ArgumentNullException(nameof(alternativeFactory));
 
-        return HasValue ? Value : alternativeFactory();
+        return IsSuccess ? Value : alternativeFactory();
     }
 
     /// <summary>
     /// Uses an alternative value if no existing value is present.
     /// </summary>
     /// <param name="alternative">The alternative value.</param>
-    /// <returns>A new optional, containing either the existing or alternative value.</returns>
-    public Result<TValue> Or(TValue alternative) => HasValue ? this : Result.Success(alternative);
+    /// <returns>A new result, containing either the existing or alternative value.</returns>
+    public Result<TValue> Or(TValue alternative) => IsSuccess ? this : Result.Success(alternative);
 
     /// <summary>
     /// Uses an alternative value if no existing value is present and attaches the specified success object.
     /// </summary>
     /// <param name="alternative">The alternative value.</param>
-    /// <param name="success">An object with data describing the reason or origin behind the presence of the alternative optional value.</param>
-    /// <returns>A new optional, containing either the existing or alternative value.</returns>
-    public Result<TValue> Or(TValue alternative, Success success) => HasValue ? this : Result.Success(alternative, success);
+    /// <param name="success">An object with data describing the reason or origin behind the presence of the alternative result value.</param>
+    /// <returns>A new result, containing either the existing or alternative value.</returns>
+    public Result<TValue> Or(TValue alternative, Success success) => IsSuccess ? this : Result.Success(alternative, success);
 
     /// <summary>
     /// Uses an alternative value if no existing value is present.
     /// </summary>
     /// <param name="alternativeFactory">A factory function to create an alternative value.</param>
-    /// <returns>A new optional, containing either the existing or alternative value.</returns>
+    /// <returns>A new result, containing either the existing or alternative value.</returns>
     public Result<TValue> Or(Func<TValue> alternativeFactory)
     {
         if (alternativeFactory == null) throw new ArgumentNullException(nameof(alternativeFactory));
 
-        return HasValue ? this : Result.Success(alternativeFactory());
+        return IsSuccess ? this : Result.Success(alternativeFactory());
     }
 
     /// <summary>
     /// Uses an alternative value if no existing value is present and attaches the specified success object.
     /// </summary>
     /// <param name="alternativeFactory">A factory function to create an alternative value.</param>
-    /// <param name="success">An object with data describing the reason or origin behind the presence of the alternative optional value.</param>
-    /// <returns>A new optional, containing either the existing or alternative value.</returns>
+    /// <param name="success">An object with data describing the reason or origin behind the presence of the alternative result value.</param>
+    /// <returns>A new result, containing either the existing or alternative value.</returns>
     public Result<TValue> Or(Func<TValue> alternativeFactory, Success success)
     {
         if (alternativeFactory == null) throw new ArgumentNullException(nameof(alternativeFactory));
 
-        return HasValue ? this : Result.Success(alternativeFactory(), success);
+        return IsSuccess ? this : Result.Success(alternativeFactory(), success);
     }
 
     /// <summary>
-    /// Uses an alternative optional, if no existing value is present.
+    /// Uses an alternative result, if no existing value is present.
     /// </summary>
-    /// <param name="alternativeOption">The alternative optional.</param>
-    /// <returns>The alternative optional, if no value is present, otherwise itself.</returns>
-    public Result<TValue> Else(Result<TValue> alternativeOption) => HasValue ? this : alternativeOption;
+    /// <param name="alternativeOption">The alternative result.</param>
+    /// <returns>The alternative result, if no value is present, otherwise itself.</returns>
+    public Result<TValue> Else(Result<TValue> alternativeOption) => IsSuccess ? this : alternativeOption;
 
     /// <summary>
-    /// Uses an alternative optional, if no existing value is present.
+    /// Uses an alternative result, if no existing value is present.
     /// </summary>
-    /// <param name="alternativeOptionFactory">A factory function to create an alternative optional.</param>
-    /// <returns>The alternative optional, if no value is present, otherwise itself.</returns>
+    /// <param name="alternativeOptionFactory">A factory function to create an alternative result.</param>
+    /// <returns>The alternative result, if no value is present, otherwise itself.</returns>
     public Result<TValue> Else(Func<Result<TValue>> alternativeOptionFactory)
     {
         if (alternativeOptionFactory == null) throw new ArgumentNullException(nameof(alternativeOptionFactory));
 
-        return HasValue ? this : alternativeOptionFactory();
+        return IsSuccess ? this : alternativeOptionFactory();
     }
 
     /// <summary>
@@ -180,7 +189,7 @@ public readonly struct Result<TValue>
         if (success == null) throw new ArgumentNullException(nameof(success));
         if (fail == null) throw new ArgumentNullException(nameof(fail));
 
-        return HasValue ? success(Value) : fail(Error);
+        return IsSuccess ? success(Value) : fail(ErrorReason);
     }
 
     /// <summary>
@@ -194,7 +203,7 @@ public readonly struct Result<TValue>
         if (success == null) throw new ArgumentNullException(nameof(success));
         if (fail == null) throw new ArgumentNullException(nameof(fail));
 
-        return HasValue ? success(Value, Success) : fail(Error);
+        return IsSuccess ? success(Value, SuccessReason) : fail(ErrorReason);
     }
 
     /// <summary>
@@ -207,13 +216,13 @@ public readonly struct Result<TValue>
         if (success == null) throw new ArgumentNullException(nameof(success));
         if (fail == null) throw new ArgumentNullException(nameof(fail));
 
-        if (HasValue)
+        if (IsSuccess)
         {
             success(Value);
         }
         else
         {
-            fail(Error);
+            fail(ErrorReason);
         }
     }
 
@@ -227,13 +236,13 @@ public readonly struct Result<TValue>
         if (success == null) throw new ArgumentNullException(nameof(success));
         if (fail == null) throw new ArgumentNullException(nameof(fail));
 
-        if (HasValue)
+        if (IsSuccess)
         {
-            success(Value, Success);
+            success(Value, SuccessReason);
         }
         else
         {
-            fail(Error);
+            fail(ErrorReason);
         }
     }
 
@@ -241,11 +250,11 @@ public readonly struct Result<TValue>
     /// Evaluates a specified action if a value is present.
     /// </summary>
     /// <param name="success">The action to evaluate if the value is present.</param>
-    public Result<TValue> MatchSuccess(Action<TValue> success)
+    public Result<TValue> IfSuccess(Action<TValue> success)
     {
         if (success == null) throw new ArgumentNullException(nameof(success));
 
-        if (HasValue)
+        if (IsSuccess)
         {
             success(Value);
         }
@@ -257,13 +266,13 @@ public readonly struct Result<TValue>
     /// Evaluates a specified action if a value is present.
     /// </summary>
     /// <param name="success">The action to evaluate if the value is present.</param>
-    public Result<TValue> MatchSuccess(Action<TValue, Success> success)
+    public Result<TValue> IfSuccess(Action<TValue, Success> success)
     {
         if (success == null) throw new ArgumentNullException(nameof(success));
 
-        if (HasValue)
+        if (IsSuccess)
         {
-            success(Value, Success);
+            success(Value, SuccessReason);
         }
 
         return this;
@@ -273,24 +282,24 @@ public readonly struct Result<TValue>
     /// Evaluates a specified action if no value is present.
     /// </summary>
     /// <param name="fail">The action to evaluate if the value is missing.</param>
-    public Result<TValue> MatchFail(Action<Error> fail)
+    public Result<TValue> IfFail(Action<Error> fail)
     {
         if (fail == null) throw new ArgumentNullException(nameof(fail));
 
-        if (!HasValue)
+        if (!IsSuccess)
         {
-            fail(Error);
+            fail(ErrorReason);
         }
 
         return this;
     }
 
     /// <summary>
-    /// Transforms the inner value of an optional. If the instance is empty, an empty optional is returned.
+    /// Transforms the inner value of an result. If the instance is empty, an empty result is returned.
     /// </summary>
     /// <param name="mapping">The transformation function.</param>
-    /// <param name="childError">If the resulting optional is empty, sets its error as the direct reason to the specified subsequent error.<para>Example: "Failed to create object" (child error), Caused by: "The name property cannot be null" (antecedent empty optional)</para></param>
-    /// <returns>The transformed optional.</returns>
+    /// <param name="childError">If the resulting result is empty, sets its error as the direct reason to the specified subsequent error.<para>Example: "Failed to create object" (child error), Caused by: "The name property cannot be null" (antecedent empty result)</para></param>
+    /// <returns>The transformed result.</returns>
     public Result<TResult> Map<TResult>(Func<TValue, TResult> mapping, Error childError = null)
     {
         if (mapping == null) throw new ArgumentNullException(nameof(mapping));
@@ -309,11 +318,11 @@ public readonly struct Result<TValue>
     }
 
     /// <summary>
-    /// Transforms the inner value of an optional. If the instance is empty, an empty optional is returned.
+    /// Transforms the inner value of an result. If the instance is empty, an empty result is returned.
     /// </summary>
     /// <param name="mapping">The transformation function.</param>
-    /// <param name="childError">If the resulting optional is empty, sets its error as the direct reason to the specified subsequent error.<para>Example: "Failed to create object" (child error), Caused by: "The name property cannot be null" (antecedent empty optional)</para></param>
-    /// <returns>The transformed optional.</returns>
+    /// <param name="childError">If the resulting result is empty, sets its error as the direct reason to the specified subsequent error.<para>Example: "Failed to create object" (child error), Caused by: "The name property cannot be null" (antecedent empty result)</para></param>
+    /// <returns>The transformed result.</returns>
     public Result<TResult> Map<TResult>(Func<TValue, Success, TResult> mapping, Error childError = null)
     {
         if (mapping == null) throw new ArgumentNullException(nameof(mapping));
@@ -332,22 +341,22 @@ public readonly struct Result<TValue>
     }
 
     /// <summary>
-    /// Transforms the inner value of an optional into another optional. The result is flattened, and if either is empty, an empty optional is returned.
+    /// Transforms the inner value of an result into another result. The result is flattened, and if either is empty, an empty result is returned.
     /// </summary>
     /// <param name="mapping">The transformation function.</param>
-    /// <param name="childError">If the resulting optional is empty, sets its error as the direct reason to the specified subsequent error.<para>Example: "Failed to create object" (child error), Caused by: "The name property cannot be null" (antecedent empty optional)</para></param>
-    /// <returns>The transformed optional.</returns>
+    /// <param name="childError">If the resulting result is empty, sets its error as the direct reason to the specified subsequent error.<para>Example: "Failed to create object" (child error), Caused by: "The name property cannot be null" (antecedent empty result)</para></param>
+    /// <returns>The transformed result.</returns>
     public Result<TResult> FlatMap<TResult>(Func<TValue, Result<TResult>> mapping, Error childError = null)
     {
         if (mapping == null) throw new ArgumentNullException(nameof(mapping));
 
         Result<TResult> result;
 
-        if (HasValue)
+        if (IsSuccess)
         {
             result = mapping(Value);
 
-            result.MatchFail(e =>
+            result.IfFail(e =>
             {
                 if (childError != null)
                 {
@@ -357,29 +366,29 @@ public readonly struct Result<TValue>
         }
         else
         {
-            result = Result.Fail<TResult>(childError != null ? childError.CausedBy(Error) : Error);
+            result = Result.Fail<TResult>(childError != null ? childError.CausedBy(ErrorReason) : ErrorReason);
         }
 
         return result;
     }
 
     /// <summary>
-    /// Transforms the inner value of an optional into another optional. The result is flattened, and if either is empty, an empty optional is returned.
+    /// Transforms the inner value of an result into another result. The result is flattened, and if either is empty, an empty result is returned.
     /// </summary>
     /// <param name="mapping">The transformation function.</param>
-    /// <param name="childError">If the resulting optional is empty, sets its error as the direct reason to the specified subsequent error.<para>Example: "Failed to create object" (child error), Caused by: "The name property cannot be null" (antecedent empty optional)</para></param>
-    /// <returns>The transformed optional.</returns>
+    /// <param name="childError">If the resulting result is empty, sets its error as the direct reason to the specified subsequent error.<para>Example: "Failed to create object" (child error), Caused by: "The name property cannot be null" (antecedent empty result)</para></param>
+    /// <returns>The transformed result.</returns>
     public Result<TResult> FlatMap<TResult>(Func<TValue, Success, Result<TResult>> mapping, Error childError = null)
     {
         if (mapping == null) throw new ArgumentNullException(nameof(mapping));
 
         Result<TResult> result;
 
-        if (HasValue)
+        if (IsSuccess)
         {
-            result = mapping(Value, Success);
+            result = mapping(Value, SuccessReason);
 
-            result.MatchFail(e =>
+            result.IfFail(e =>
             {
                 if (childError != null)
                 {
@@ -389,22 +398,22 @@ public readonly struct Result<TValue>
         }
         else
         {
-            result = Result.Fail<TResult>(childError != null ? childError.CausedBy(Error) : Error);
+            result = Result.Fail<TResult>(childError != null ? childError.CausedBy(ErrorReason) : ErrorReason);
         }
 
         return result;
     }
 
     /// <summary>
-    /// If the current optional has a value, sets its success reason as the direct reason to the specified subsequent success reason.
-    /// <para>Example: "Created object successfully" (child success reason), Anteceded by: "Property has a value" (antecedent optional with a value)</para>
+    /// If the current result has a value, sets its success reason as the direct reason to the specified subsequent success reason.
+    /// <para>Example: "Created object successfully" (child success reason), Anteceded by: "Property has a value" (antecedent result with a value)</para>
     /// </summary>
-    /// <param name="childSuccess">The success object to attach the non-empty optional's success object to.</param>
+    /// <param name="childSuccess">The success object to attach the non-empty result's success object to.</param>
     public Result<TValue> FlatMapSome(Success childSuccess)
     {
         if (childSuccess == null) throw new ArgumentNullException(nameof(childSuccess));
 
-        if (!HasValue)
+        if (!IsSuccess)
         {
             return Result.Success(Value, childSuccess.AntecededBy(this));
         }
@@ -413,15 +422,15 @@ public readonly struct Result<TValue>
     }
 
     /// <summary>
-    /// If the current optional is empty, sets its error as the direct reason to the specified subsequent error.
-    /// <para>Example: "Failed to create object" (child error), Caused by: "The name property cannot be null" (antecedent empty optional)</para>
+    /// If the current result is empty, sets its error as the direct reason to the specified subsequent error.
+    /// <para>Example: "Failed to create object" (child error), Caused by: "The name property cannot be null" (antecedent empty result)</para>
     /// </summary>
-    /// <param name="childError">The error object to attach the empty optional's error object to.</param>
+    /// <param name="childError">The error object to attach the empty result's error object to.</param>
     public Result<TValue> FlatMapNone(Error childError)
     {
         if (childError == null) throw new ArgumentNullException(nameof(childError));
 
-        if (!HasValue)
+        if (!IsSuccess)
         {
             return Result.Fail<TValue>(childError.CausedBy(this));
         }
@@ -430,24 +439,24 @@ public readonly struct Result<TValue>
     }
 
     /// <summary>
-    /// Empties an optional and attaches an error object if the specified predicate is not satisfied.
+    /// Empties an result and attaches an error object if the specified predicate is not satisfied.
     /// </summary>
     /// <param name="predicate">The predicate.</param>
     /// <param name="predicateFailure">An error object describing why the predicate failed.<para>Example: "Value must be greater than 10. Was 2."</para></param>
-    /// <param name="childError">An error object describing that the predicate potentially failed to execute because the optional was empty.<para>Example: "Predicate never executed" (child error), Caused by: "The name property cannot be null" (antecedent empty optional)</para></param>
-    /// <returns>The filtered optional.</returns>
+    /// <param name="childError">An error object describing that the predicate potentially failed to execute because the result was empty.<para>Example: "Predicate never executed" (child error), Caused by: "The name property cannot be null" (antecedent empty result)</para></param>
+    /// <returns>The filtered result.</returns>
     public Result<TValue> Filter(Predicate<TValue> predicate, Error predicateFailure, Error childError = null)
     {
         return Filter(predicate, v => predicateFailure, childError);
     }
 
     /// <summary>
-    /// Empties an optional and attaches an error object if the specified predicate is not satisfied.
+    /// Empties an result and attaches an error object if the specified predicate is not satisfied.
     /// </summary>
     /// <param name="predicate">The predicate.</param>
     /// <param name="predicateFailure">An error object describing why the predicate failed.<para>Example: "Value must be greater than 10. Was 2."</para></param>
-    /// <param name="childError">An error object describing that the predicate potentially failed to execute because the optional was empty.<para>Example: "Predicate never executed" (child error), Caused by: "The name property cannot be null" (antecedent empty optional)</para></param>
-    /// <returns>The filtered optional.</returns>
+    /// <param name="childError">An error object describing that the predicate potentially failed to execute because the result was empty.<para>Example: "Predicate never executed" (child error), Caused by: "The name property cannot be null" (antecedent empty result)</para></param>
+    /// <returns>The filtered result.</returns>
     public Result<TValue> Filter(Predicate<TValue> predicate, Func<TValue, Error> predicateFailure, Error childError = null)
     {
         if (predicate == null) throw new ArgumentNullException(nameof(predicate));
@@ -457,29 +466,29 @@ public readonly struct Result<TValue>
             return predicate(value) ? this : Result.Fail<TValue>(predicateFailure(value));
         }
 
-        return Result.Fail<TValue>(childError?.CausedBy(Error) ?? Error);
+        return Result.Fail<TValue>(childError?.CausedBy(ErrorReason) ?? ErrorReason);
     }
 
     /// <summary>
-    /// Empties an optional and attaches an error object if the value is null.
+    /// Empties an result and attaches an error object if the value is null.
     /// </summary>
-    /// <param name="error">An error object with data describing why the optional is missing its value.</param>
-    /// <returns>The filtered optional.</returns>
+    /// <param name="error">An error object with data describing why the result is missing its value.</param>
+    /// <returns>The filtered result.</returns>
     public Result<TValue> NotNull(Error error)
     {
         if (error == null) throw new ArgumentNullException(nameof(error));
 
-        return HasValue && Value == null ? Result.Fail<TValue>(error) : this;
+        return IsSuccess && Value == null ? Result.Fail<TValue>(error) : this;
     }
 
 
     /// <summary>
-    /// Returns a string that represents the current optional.
+    /// Returns a string that represents the current result.
     /// </summary>
-    /// <returns>A string that represents the current optional.</returns>
+    /// <returns>A string that represents the current result.</returns>
     public override string ToString()
     {
-        if (HasValue)
+        if (IsSuccess)
         {
             string valueString = "";
 
@@ -499,9 +508,9 @@ public readonly struct Result<TValue>
                 }
             }
 
-            return $"Success({valueString}{(Success.Message != "" || Success.Metadata.Count > 0 ? $" | {Success}" : "")})";
+            return $"Success({valueString}{(SuccessReason.Message != "" || SuccessReason.Metadata.Count > 0 ? $" | {SuccessReason}" : "")})";
         }
 
-        return $"Fail{(Error != null ? $"(Error={Error})" : "")}";
+        return $"Fail{(ErrorReason != null ? $"(Error={ErrorReason})" : "")}";
     }
 }

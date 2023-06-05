@@ -14,10 +14,10 @@
     {
 
         /// <summary>
-        /// Flattens a sequence of optionals into a sequence containing all inner values.
+        /// Flattens a sequence of results into a sequence containing all inner values.
         /// Empty elements are discarded.
         /// </summary>
-        /// <param name="source">The sequence of optionals.</param>
+        /// <param name="source">The sequence of results.</param>
         /// <returns>A flattened sequence of values.</returns>
         public static IEnumerable<TValue> Values<TValue>(this IEnumerable<Result<TValue>> source)
         {
@@ -25,7 +25,7 @@
 
             foreach (var option in source)
             {
-                if (option.HasValue)
+                if (option.IsSuccess)
                 {
                     yield return option.Value;
                 }
@@ -33,10 +33,10 @@
         }
 
         /// <summary>
-        /// Flattens a sequence of optionals into a sequence containing all exceptional values.
+        /// Flattens a sequence of results into a sequence containing all exceptional values.
         /// Non-empty elements and their values are discarded.
         /// </summary>
-        /// <param name="source">The sequence of optionals.</param>
+        /// <param name="source">The sequence of results.</param>
         /// <returns>A flattened sequence of exceptional values.</returns>
         public static IEnumerable<Error> Errors<TValue>(this IEnumerable<Result<TValue>> source)
         {
@@ -44,9 +44,9 @@
 
             foreach (var option in source)
             {
-                if (!option.HasValue)
+                if (!option.IsSuccess)
                 {
-                    yield return option.Error;
+                    yield return option.ErrorReason;
                 }
             }
         }
@@ -58,7 +58,7 @@
         /// </summary>
         /// <param name="source">The dictionary or enumerable in which to locate the key.</param>
         /// <param name="key">The key to locate.</param>
-        /// <param name="error">An error object with data describing why the optional is missing its value.</param>
+        /// <param name="error">An error object with data describing why the result is missing its value.</param>
         /// <returns>An <see cref="Result{TValue}"/> instance containing the associated value if located.</returns>
         public static Result<TValue> GetValueOrFail<TKey, TValue>(this IEnumerable<KeyValuePair<TKey, TValue>> source, TKey key, Error error = null)
         {
@@ -83,7 +83,7 @@
         /// Returns the first element of a sequence if such exists.
         /// </summary>
         /// <param name="source">The sequence to return the first element from.</param>
-        /// <param name="error">An error object with data describing why the optional is missing its value.</param>
+        /// <param name="error">An error object with data describing why the result is missing its value.</param>
         /// <returns>An <see cref="Result{TValue}"/> instance containing the first element if present.</returns>
         public static Result<TSource> FirstOrFail<TSource>(this IEnumerable<TSource> source, Error error = null)
         {
@@ -123,7 +123,7 @@
         /// </summary>
         /// <param name="source">The sequence to return the first element from.</param>
         /// <param name="predicate">The predicate to filter by.</param>
-        /// <param name="error">An error object with data describing why the optional is missing its value.</param>
+        /// <param name="error">An error object with data describing why the result is missing its value.</param>
         /// <returns>An <see cref="Result{TValue}"/> instance containing the first element if present.</returns>
         public static Result<TSource> FirstOrFail<TSource>(this IEnumerable<TSource> source, Predicate<TSource> predicate, Error error = null)
         {
@@ -145,7 +145,7 @@
         /// Returns the last element of a sequence if such exists.
         /// </summary>
         /// <param name="source">The sequence to return the last element from.</param>
-        /// <param name="error">An error object with data describing why the optional is missing its value.</param>
+        /// <param name="error">An error object with data describing why the result is missing its value.</param>
         /// <returns>An <see cref="Result{TValue}"/> instance containing the last element if present.</returns>
         public static Result<TSource> LastOrFail<TSource>(this IEnumerable<TSource> source, Error error = null)
         {
@@ -194,7 +194,7 @@
         /// </summary>
         /// <param name="source">The sequence to return the last element from.</param>
         /// <param name="predicate">The predicate to filter by.</param>
-        /// <param name="error">An error object with data describing why the optional is missing its value.</param>
+        /// <param name="error">An error object with data describing why the result is missing its value.</param>
         /// <returns>An <see cref="Result{TValue}"/> instance containing the last element if present.</returns>
         public static Result<TSource> LastOrFail<TSource>(this IEnumerable<TSource> source, Predicate<TSource> predicate, Error error = null)
         {
@@ -255,7 +255,7 @@
         /// and is the only element in the sequence.
         /// </summary>
         /// <param name="source">The sequence to return the element from.</param>
-        /// <param name="error">An error object with data describing why the optional is missing its value.</param>
+        /// <param name="error">An error object with data describing why the result is missing its value.</param>
         /// <returns>An <see cref="Result{TValue}"/> instance containing the element if present.</returns>
         public static Result<TSource> SingleOrFail<TSource>(this IEnumerable<TSource> source, Error error = null)
         {
@@ -303,7 +303,7 @@
         /// </summary>
         /// <param name="source">The sequence to return the element from.</param>
         /// <param name="predicate">The predicate to filter by.</param>
-        /// <param name="error">An error object with data describing why the optional is missing its value.</param>
+        /// <param name="error">An error object with data describing why the result is missing its value.</param>
         /// <returns>An <see cref="Result{TValue}"/> instance containing the element if present.</returns>
         public static Result<TSource> SingleOrFail<TSource>(this IEnumerable<TSource> source, Predicate<TSource> predicate, Error error = null)
         {
@@ -338,7 +338,7 @@
         /// </summary>
         /// <param name="source">The sequence to return the element from.</param>
         /// <param name="index">The index in the sequence.</param>
-        /// <param name="error">An error object with data describing why the optional is missing its value.</param>
+        /// <param name="error">An error object with data describing why the result is missing its value.</param>
         /// <returns>An <see cref="Result{TValue}"/> instance containing the element if found.</returns>
         public static Result<TSource> ElementAtOrFail<TSource>(this IEnumerable<TSource> source, int index, Error error = null)
         {
@@ -415,10 +415,10 @@
 
 
         /// <summary>
-        /// Transforms each item in a sequence according to the specified option-returning transformation function, short-circuiting the moment a function iteration results in an empty optional.
+        /// Transforms each item in a sequence according to the specified option-returning transformation function, short-circuiting the moment a function iteration results in an empty result.
         /// </summary>
         /// <typeparam name="TSource">The type of the source item to transform.</typeparam>
-        /// <typeparam name="TResult">The type of the resulting optional value.</typeparam>
+        /// <typeparam name="TResult">The type of the resulting result value.</typeparam>
         /// <param name="source">Sequence of items to transform.</param>
         /// <param name="func">Transformation function to apply to each item of the sequence.</param>
         public static Result<IReadOnlyList<TResult>> Transform<TSource, TResult>(this IEnumerable<TSource> source, Func<TSource, Result<TResult>> func)
@@ -430,7 +430,7 @@
 
             if (failedTransformation.HasValue)
             {
-                return Result.Fail<IReadOnlyList<TResult>>(failedTransformation.Value.Error);
+                return Result.Fail<IReadOnlyList<TResult>>(failedTransformation.Value.ErrorReason);
             }
 
 
@@ -444,7 +444,7 @@
                 {
                     var result = func(item);
 
-                    if (result.HasValue)
+                    if (result.IsSuccess)
                     {
                         yield return result.Value;
                     }

@@ -27,7 +27,7 @@
 
 
         /// <summary>
-        /// Resolves the outcome delegate of the optional, returning a regular optional whose outcome depends on the result of the delegate.
+        /// Resolves the outcome delegate of the result, returning a regular result whose outcome depends on the result of the delegate.
         /// </summary>
         /// <returns></returns>
         public Result Resolve()
@@ -57,7 +57,7 @@
 
 
         /// <summary>
-        /// Resolves the outcome delegate of the optional, returning a regular optional whose outcome depends on the result of the delegate.
+        /// Resolves the outcome delegate of the result, returning a regular result whose outcome depends on the result of the delegate.
         /// </summary>
         /// <returns></returns>
         public async Task<Result> Resolve()

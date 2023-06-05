@@ -55,24 +55,24 @@
 
         public Success AntecededBy<TValue>(Result<TValue> some)
         {
-            if (!some.HasValue)
+            if (!some.IsSuccess)
             {
-                throw new InvalidOperationException("The optional value cannot empty in order to access its success object");
+                throw new InvalidOperationException("The result value cannot empty in order to access its success object");
             }
 
-            some.MatchSuccess((_, s) => Reasons.Add(s));
+            some.IfSuccess((_, s) => Reasons.Add(s));
 
             return this;
         }
 
         public Success AntecededBy(Result some)
         {
-            if (!some.IsSuccessful)
+            if (!some.IsSuccess)
             {
-                throw new InvalidOperationException("The optional value cannot unsuccessful in order to access its success object");
+                throw new InvalidOperationException("The result value cannot unsuccessful in order to access its success object");
             }
 
-            some.MatchSuccess(s => Reasons.Add(s));
+            some.IfSuccess(s => Reasons.Add(s));
 
             return this;
         }

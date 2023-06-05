@@ -56,24 +56,24 @@
 
         public Error CausedBy<TValue>(Result<TValue> none)
         {
-            if (none.HasValue)
+            if (none.IsSuccess)
             {
-                throw new InvalidOperationException("The optional value must be empty in order to access its error object");
+                throw new InvalidOperationException("The result value must be empty in order to access its error object");
             }
 
-            none.MatchFail(e => Reasons.Add(e));
+            none.IfFail(e => Reasons.Add(e));
 
             return this;
         }
 
         public Error CausedBy(Result none)
         {
-            if (none.IsSuccessful)
+            if (none.IsSuccess)
             {
-                throw new InvalidOperationException("The optional's outcome must be unsuccessful in order to access its error object");
+                throw new InvalidOperationException("The result's outcome must be unsuccessful in order to access its error object");
             }
 
-            none.MatchFail(e => Reasons.Add(e));
+            none.IfFail(e => Reasons.Add(e));
 
             return this;
         }
