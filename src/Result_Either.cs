@@ -33,7 +33,7 @@ public readonly struct Result<TValue>
     }
 
     public static implicit operator Result<TValue>(TValue value)
-        => Result.Success(value);
+        => Result.Success<TValue>(value);
 
     public static implicit operator Result<TValue>(Error error)
         => Result.Fail<TValue>(error);
