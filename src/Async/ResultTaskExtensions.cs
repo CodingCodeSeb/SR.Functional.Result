@@ -1323,7 +1323,7 @@
         /// Evaluates a specified action if the result's outcome is succesful.
         /// </summary>
         /// <param name="success">The action to evaluate if the result's outcome is succesful.</param>
-        public static async Task<Result> IfSuccessASync(this Task<Result> result, Func<Success, Task> success)
+        public static async Task<Result> IfSuccessAsync(this Task<Result> result, Func<Success, Task> success)
         {
             if (success == null) throw new ArgumentNullException(nameof(success));
 
@@ -1359,7 +1359,7 @@
         /// Evaluates a specified action if the result's outcome is succesful.
         /// </summary>
         /// <param name="success">The action to evaluate if the result's outcome is succesful.</param>
-        public static async Task<Result> IfSuccessASync(this Result result, Func<Success, Task> success)
+        public static async Task<Result> IfSuccessAsync(this Result result, Func<Success, Task> success)
         {
             if (success == null) throw new ArgumentNullException(nameof(success));
 
